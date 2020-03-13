@@ -263,6 +263,9 @@ const ratingManager = {
     _ratingCountSelector: '#rating-count',
     _updateRatingCount: function(newCount) {
         $(this._ratingCountSelector).text(newCount);
+        if (newCount >= 10) {
+            $("#ready-note").removeClass('d-none');
+        }
     },
     _submitRating: function(movieId, rating) {
         const method = (rating == 0) ? "DELETE" : "POST";

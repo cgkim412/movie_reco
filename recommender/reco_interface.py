@@ -53,7 +53,7 @@ class RecoInterface:
         clusters = agg.fit_predict(xpc)
 
         count = self._count_occurrences(clusters)
-        major_clusters = sorted(count.keys(), key=count.get, reverse=True)[:8]
+        major_clusters = sorted(count.keys(), key=count.get, reverse=True)[:10]
 
         clustered_items = []
         unlabeled = []
@@ -123,8 +123,8 @@ class RecoInterface:
         rated_movies = user.ratings.values_list('movie', flat=True)
 
         # simply return the id of the movies
-        eval_candidates = Movie.objects.filter(imdb_votes__gte=10**5).filter(imdb_score__gte=6.0).\
-            filter(imdb_score__lte=8.0).exclude(id__in=rated_movies).values_list('id', flat=True)
+        eval_candidates = Movie.objects.filter(imdb_votes__gte=3*10**5).filter(imdb_score__gte=6.0).\
+            filter(imdb_score__lte=9.0).exclude(id__in=rated_movies).values_list('id', flat=True)
         eval_list = np.random.choice(eval_candidates, size=limit, replace=False)
         return eval_list
 

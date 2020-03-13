@@ -32,6 +32,15 @@ $(document).ready(() => {
     $('#container-main').prepend(ratingIntro);
   }
 
+  const readyNote =
+    `<div id="ready-note" class="alert alert-success d-none alert-dismissible fade show text-center mb-1" role="alert">
+      <strong>수고하셨어요!</strong> 평점을 열심히 매겨 주셨네요. 이제 <a href="{% url 'home' %}">홈</a>으로 가서 추천 영화 목록을 확인해 보세요.
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close" data-toggle="tooltip" data-placement="top" title="닫기">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>`;
+  $('#container-main').prepend(readyNote);
+
   const evalList = JSON.parse('{{ eval_list|safe }}');
   const loader = new MovieCardLoaderV("#container-movie-cards", 12, 5, StarMovieCard);
   loader.initialize(evalList);
