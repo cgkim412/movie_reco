@@ -1,0 +1,74 @@
+{% extends "base_core.html" %}
+
+{% block header %}
+{% load static %}
+
+<style id="style-lazy">
+  .lazy-load {
+    background-image: none !important;
+  }
+</style>
+
+<style>
+
+  .card-clickable { cursor: pointer; }
+
+  .card-container {
+    overflow-x: hidden;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    min-height: 200px;
+    margin-bottom: 10px;
+  }
+
+
+  .carousel-control-next-icon {
+    color = red;
+    width = 100px;
+  }
+
+  @media all and (min-width: 768px) {
+    .card-container {
+      min-height: 360px;
+    }
+
+    .container-sim {
+      height: 60vh;
+    }
+
+  }
+</style>
+
+<script src="{% static 'cards.js' %}"></script>
+<script src="{% static 'data-loader.js' %}"></script>
+<script>
+  const movieBaseUrl = "{% url 'movie' %}";
+  const posterBaseUrl = "{% url 'poster' %}";
+
+  $(document).ready(() => {
+    const sticky =
+      `<div class="alert alert-secondary sticky-top text-center" role="alert">
+        <h6 class="mb-0"> 안녕하세요! {{ user }}
+        </h6>
+      </div>`;
+      $('#stickies').append(sticky);
+
+      eventManager.activateAll();
+
+      const recoList = JSON.parse('{{ reco_list|safe }}');
+      const contLoader = new CardContainerLoader("#container-main", 3, 1, ArrowedCardContainer);
+      contLoader.initialize(recoList);
+  })
+
+
+</script>
+{% endblock %}
+
+
+
+{% block content %}
+
+<div id="container-modal"></div>
+
+{% endblock %}
+

@@ -1,0 +1,24 @@
+{% extends "base_accounts.html" %}
+
+{% block content %}
+
+<form class="col-md-6 text-light" method="POST" action=".">
+  <div class="text-warning text-center">
+    <p class="mb-1">실제 개인정보를 입력하실 필요가 없습니다.</p>
+    <p>가짜 이메일을 사용해 주세요!</p>
+  </div>
+  {% csrf_token %}
+  {% for field in form %}
+  <div class="form-group">
+    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+    <input type="{{ field.field.widget.input_type }}" class="form-control" id="{{ field.id_for_label }}"
+      placeholder="{{ field.label }}" name="{{ field.name }}" />
+  </div>
+  {% if field.errors %}
+  <span style="color: red">{{ field.errors }}</span>
+  {% endif %}
+  {% endfor %}
+  <button type="submit" class="btn btn-primary">회원가입</button>
+</form>
+
+{% endblock %}

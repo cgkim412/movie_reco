@@ -1,0 +1,54 @@
+{% extends "base_core.html" %}
+
+{% block header %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'star-rating/star-rating-svg.css' %}">
+<script src="{% static 'star-rating/jquery.star-rating-svg-customized.js' %}"></script>
+<script src="{% static 'csrf.js' %}"></script>
+<script src="{% static 'cards.js' %}"></script>
+<script src="{% static 'data-loader.js' %}"></script>
+<script>
+  const movieBaseUrl = "{% url 'movie' %}";
+  const posterBaseUrl = "{% url 'poster' %}";
+  const evalBaseUrl = "{% url 'evaluate' %}";
+  const csrftoken = getCookie('csrftoken');
+
+$(document).ready(() => {
+  const ratingSticky =
+    `<div class="alert alert-secondary sticky-top text-center" role="alert">
+      <h6 class="mb-0"> 지금까지 <a href="{% url 'eval_record' %}"><span id="rating-count">{{ rating_count }}</span>개의 영화</a>를 평가해 주셨어요.
+      </h6>
+    </div>`;
+  $('#container-main').prepend(ratingSticky);
+
+  if ( {{ rating_count }} < 10 ) {
+    const ratingIntro =
+    `<div class="alert alert-warning alert-dismissible fade show text-center mb-1" role="alert">
+      <strong>처음 오셨군요!</strong> 여기서 영화에 점수를 매겨서 당신의 취향을 알려주세요. 많이 해주실수록 좋지만 적어도 10개의 평점이 필요해요.
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close" data-toggle="tooltip" data-placement="top" title="닫기">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>`;
+    $('#container-main').prepend(ratingIntro);
+  }
+
+  const evalList = JSON.parse('{{ eval_list|safe }}');
+  const loader = new MovieCardLoaderV("#container-movie-cards", 12, 5, StarMovieCard);
+  loader.initialize(evalList);
+
+});
+
+</script>
+{% endblock %}
+
+
+
+{% block content %}
+
+
+<div id="container-movie-cards" class="row"></div>
+
+
+
+{% endblock %}
+

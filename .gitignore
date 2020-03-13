@@ -1,0 +1,16 @@
+*.sqlite3
+*.log
+*.pyc
+*.exe
+*.txt
+__pycache__
+.idea/*
+media/*
+loaders/*
+*.png
+*.jpg
+csv/*
+*.csv
+*.xlsx
+keys/*
+*.zip

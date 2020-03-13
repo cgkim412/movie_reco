@@ -1,0 +1,4 @@
+
+
+class UpdateFailed(Exception):
+    pass
