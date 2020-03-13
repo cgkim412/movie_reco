@@ -49,7 +49,7 @@ class RecoInterface:
         applicable_ids = xpc.index.values
 
         # Run some test on average vs complete linkages
-        agg = AgglomerativeClustering(n_clusters=None, affinity='cosine', linkage='average', distance_threshold=0.5)
+        agg = AgglomerativeClustering(n_clusters=None, affinity='cosine', linkage='complete', distance_threshold=0.5)
         clusters = agg.fit_predict(xpc)
 
         count = self._count_occurrences(clusters)
@@ -71,7 +71,7 @@ class RecoInterface:
 
             clustered_items += member_ids
 
-        labeled_reco_list["기타"] = list(set(movie_ids) - set(clustered_items)) + unlabeled
+        labeled_reco_list[("기타",)] = list(set(movie_ids) - set(clustered_items)) + unlabeled
         return labeled_reco_list
 
     def _get_representative_genres(self, movie_ids):
@@ -107,7 +107,7 @@ class RecoInterface:
         # recommendation by item similarity
         user_favorites = ratings.filter(score__gte=3.5)[:3]
         for fav in user_favorites:
-            similar_items = self.get_similar_items(fav.movie, 10)
+            similar_items = self.get_similar_items(fav.movie, 6)
             for item in similar_items:
                 reco_list.add(item)
 
