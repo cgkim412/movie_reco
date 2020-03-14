@@ -23,11 +23,12 @@ class RecoInterface:
         self.tagged_item_ids = np.array(Similarity.objects.values('movie_id').distinct().order_by('movie_id').values_list(
             'movie_id', flat=True))
         self.all_item_ids = np.arange(1, 9527)
-        self.xpc = self._load_xpc()
+        self.xpc = self._load_xpc(25)
+        print(self.xpc)
 
-    def _load_xpc(self):
+    def _load_xpc(self, n_components):
         data = np.load(os.path.join(PARAMS_PATH, "movie_features_pc50.npy"))
-        return pd.DataFrame(data, index=self.tagged_item_ids)
+        return pd.DataFrame(data, index=self.tagged_item_ids)[np.arange(n_components)]
 
     def _encode_ratings(self, ratings_list):
         X = dok_matrix((1, 9526))
@@ -112,19 +113,20 @@ class RecoInterface:
         for fav in user_favorites:
             similar_items = np.random.choice(self.get_similar_items(fav.movie, 20), size=min(int(limit/25), 8), replace=False)
             reco_list += similar_items.tolist()
-
-        # remove items that are already rated by the user
-        reco_list = list(set(reco_list) - rated)
-
+        reco_list = set(reco_list) - rated
+        
         # recommendation by CF
         cf_prediction = self._predict_ratings(R)
         cf_best_items = (-cf_prediction).argsort()[:limit + ratings.count()] + 1 # +1 because DB ids start from 1
-        cf_best_items = list(set(cf_best_items) - rated)
 
-        reco_list = (reco_list + cf_best_items)[:limit]
+        for item in cf_best_items:
+            if item not in rated:
+                reco_list.add(item)
+                if len(reco_list) >= limit:
+                    break
 
         # perform clustering and put labels
-        clustered_list = self._cluster_and_label(reco_list)
+        clustered_list = self._cluster_and_label(list(reco_list))
         return clustered_list
 
     def get_eval_list(self, user, limit=100):

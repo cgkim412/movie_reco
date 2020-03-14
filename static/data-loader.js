@@ -216,7 +216,7 @@ const eventManager = {
     const callback = function(entries, observer) {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-        $(entry.target).find(".lazy-load").removeClass("lazy-load");
+          $(entry.target).find(".lazy-load").removeClass("lazy-load");
         }
       });
     };

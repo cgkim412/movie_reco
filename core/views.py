@@ -32,7 +32,7 @@ def home(request):
     if user.ratings.all().count() < 10:
         return redirect('evaluate')
 
-    reco_list = RECO_INTERFACE.get_recommendation(user, limit=200)
+    reco_list = RECO_INTERFACE.get_recommendation(user, limit=100)
 
     res_data = []
     for label, items in reco_list.items():
