@@ -122,11 +122,9 @@ class RecoInterface:
         cf_best_items = list(set(cf_best_items) - rated)
 
         reco_list = (reco_list + cf_best_items)[:limit]
-        print(len(reco_list))
 
         # perform clustering and put labels
         clustered_list = self._cluster_and_label(reco_list)
-        print(clustered_list)
         return clustered_list
 
     def get_eval_list(self, user, limit=100):

@@ -5,7 +5,7 @@ class BaseDataLoader {
     this.batchSize = batchSize;
     this._queue = [];
     this._isReady = true;
-    this._minDelay = 300; // in millisecond
+    this._minDelay = 200; // in millisecond
   }
 
   initialize(data) {
