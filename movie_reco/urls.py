@@ -18,12 +18,11 @@ from django.urls import path
 from core.views import index, about, home
 from accounts.views import LoginView, RegisterView, logout
 from ratings.views import evaluate, my_ratings, RatingAPI
-from movies.views import MovieAPI, MoviePosterAPI, SimpleMovieAPI
+from movies.views import MovieAPI, SimpleMovieAPI
 
 api_base_urls = [
     path('evaluate/', evaluate, name='evaluate'),
     path('movie/', home, name='movie'),
-    path('movie/poster/', home, name='poster'),
 ]
 
 api_urls = [
@@ -31,7 +30,6 @@ api_urls = [
     path('evaluate/record/', my_ratings, name='eval_record'),
     path('movie/<int:movie_id>/', MovieAPI.as_view()),
     path('movie/<int:movie_id>/lite/', SimpleMovieAPI.as_view()),
-    path('movie/poster/<int:movie_id>/', MoviePosterAPI.as_view()),
 ]
 
 urlpatterns = [

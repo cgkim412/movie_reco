@@ -67,13 +67,3 @@ class SimpleMovieAPI(APIView):
 
         json = JSONRenderer().render(response_data)
         return Response(json)
-
-
-@method_decorator(login_required, name='dispatch')
-class MoviePosterAPI(APIView):
-    def get(self, request, movie_id):
-        movie = get_object_or_404(Movie, id=movie_id)
-        if movie.poster:
-            return HttpResponse(movie.poster.read(), content_type="image/jpg")
-        else:
-            return HttpResponse(status=404)
