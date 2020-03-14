@@ -11,6 +11,7 @@ import logging
 from django.http.response import HttpResponse
 from recommender.reco_interface import RECO_INTERFACE
 from django.urls import reverse
+from movies.tmdb import poster_url
 
 logger = logging.getLogger('movie_api')
 
@@ -37,7 +38,7 @@ class MovieAPI(APIView):
 
         if movie.overview_kr:
             response_data['overview'] = movie.overview_kr
-            response_data['poster'] = reverse('poster') + str(movie.id)
+            response_data['poster'] = poster_url(movie.poster)
         else:
             response_data['overview'] = movie.overview
             response_data['poster'] = movie.alt_poster
@@ -60,7 +61,7 @@ class SimpleMovieAPI(APIView):
         response_data = SimpleMovieSerializer(movie).data
 
         if movie.overview_kr:
-            response_data['poster'] = reverse('poster') + str(movie.id)
+            response_data['poster'] = poster_url(movie.poster)
         else:
             response_data['poster'] = movie.alt_poster
 

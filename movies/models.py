@@ -21,7 +21,7 @@ class Movie(models.Model):
     overview = models.TextField(verbose_name="Plot overview (EN)")
     overview_kr = models.TextField(verbose_name="Plot overview (KR)")
 
-    poster = models.ImageField(null=True, upload_to="posters/", verbose_name="Movie poster")
+    poster = models.TextField(null=True, verbose_name="poster URL")
     alt_poster = models.TextField(verbose_name="Alt. poster URL")
 
     imdb_score = models.DecimalField(null=True, max_digits=2, decimal_places=1, verbose_name="IMDB avg. score")
@@ -49,7 +49,7 @@ class Movie(models.Model):
         if self.is_init_state or force_update:
             self.title_kr = data['title']
             self.release_date = data['release_date']
-            # self.runtime = data['runtime']
+            self.poster = data['poster_path']
             self.tagline = data['tagline']
             self.overview_kr = data['overview']
 
@@ -83,10 +83,6 @@ class Movie(models.Model):
                     company.save()
                 finally:
                     MovieCompany.objects.get_or_create(movie=self, company=company)
-
-            if not self.poster:
-                self.poster.save(data['poster_path'].split('/')[-1],
-                                 ContentFile(requests.get(poster_url(data['poster_path'])).content), save=False)
 
             self.is_init_state = False
 
