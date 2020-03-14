@@ -79,9 +79,7 @@ class MovieSerializer(ModelSerializer):
         fields = [
             'id', 'title', 'title_kr', 'release_year', 'runtime',
             'imdb_score', 'tmdb_score',
-            'overview', 'overview_kr',
-            'genres', 'directors', 'actors',
-            'countries'
+            'genres', 'directors', 'actors', 'countries',
         ]
 
 

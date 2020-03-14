@@ -1,12 +1,11 @@
 // assumes following variables are defined in the global scope
-// movieBaseUrl, posterBaseUrl, evalBaseUrl, csrftoken, eventManager
+// movieBaseUrl, evalBaseUrl, csrftoken, eventManager
 
 
 class BaseMovieCard {
     constructor(movieId) {
         this.movieId = movieId;
         this.dataUrl = movieBaseUrl + movieId + "/lite/";
-        this.posterUrl = posterBaseUrl + movieId + "/";
         this.cardId = "movie-card-" + movieId;
         this.parentSelector = null;
     }
@@ -64,7 +63,7 @@ class StarMovieCard extends BaseMovieCard {
         const card = `
         <div class="col-6 col-md-4 col-lg-3 px-0 mx-0">
             <div id="${this.cardId}" class="card h-100 mb-1 border-black text-white bg-dark">
-                <div class="card-header border-dark" style="background: url(${this.posterUrl}); background-position: center center; 
+                <div class="card-header border-dark" style="background: url(${movie.poster}); background-position: center center; 
                 background-size: contain; background-repeat: no-repeat; min-height: 250px; max-height:400px;"></div>
                 <div class="card-body my-1 py-1 my-md-2 text-center">
                     <h6 class="card-title mb-0">${movie.title_kr} (${movie.release_year})</h6>
@@ -89,7 +88,7 @@ class MoviePosterCard extends BaseMovieCard {
         const card = `
         <div class="col-4 col-lg-3 px-0 mx-0 my-0 my-lg-1">
             <div id="${this.cardId}" class="card h-100 my-0 mx-1 mx-md-2 mx-lg-3 bg-dark text-light" movie-id="${movie.id}">
-                <div class="card-header card-clickable h-100 movie-poster border-dark" style="background: url(${this.posterUrl}); background-position: center center; 
+                <div class="card-header card-clickable h-100 movie-poster border-dark" style="background: url(${movie.poster}); background-position: center center; 
                 background-size: contain; background-repeat: no-repeat; min-height: 150px;"></div>
             </div>
         </div>
@@ -110,7 +109,7 @@ class SimpleMovieCard extends BaseMovieCard {
         const card = `
         <div class="col-4 col-lg-3 px-0 px-md-2 px-lg-3">
             <div id="${this.cardId}" class="card h-100 mx-lg-3 my-0 bg-dark text-light" movie-id="${movie.id}">
-                <div class="lazy-load card-header card-clickable h-100 border-dark" style="background: url(${this.posterUrl}); background-position: center center; 
+                <div class="lazy-load card-header card-clickable h-100 border-dark" style="background: url(${movie.poster}); background-position: center center; 
                 background-size: contain; background-repeat: no-repeat; min-height: 150px;"></div>
                 <div class="card-body mx-0 my-md-2 px-0 pt-0 pb-1 text-center" style="min-height: 40px;">
                 <p class="h6 card-title simple-title mb-0">${movie.title_kr} (${movie.release_year})</p></div>
@@ -157,7 +156,7 @@ class DetailedMovieCard extends BaseMovieCard {
         const simContainer = this._renderSimContainerDiv(movie);
         const card = `
         <div id="${this.cardId}" class="card bg-dark text-light">
-            <div class="card-header px-0 py-0 border-dark" style="background: url(${this.posterUrl}); background-position: center center;
+            <div class="card-header px-0 py-0 border-dark" style="background: url(${movie.poster}); background-position: center center;
                 background-size: cover; height: 25vh;">
             </div>
             <div class="card-body pb-0">
