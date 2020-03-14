@@ -16,7 +16,7 @@ from recommender.reco_interface import RECO_INTERFACE
 @login_required
 def evaluate(request):
     user = User.objects.get(id=request.session.get('user'))
-    eval_list = RECO_INTERFACE.get_eval_list(user, limit=10)
+    eval_list = RECO_INTERFACE.get_eval_list(user, limit=100)
     json = JSONRenderer().render(eval_list)
 
     rating_count = user.ratings.all().count()

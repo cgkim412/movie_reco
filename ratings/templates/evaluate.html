@@ -18,7 +18,7 @@ $(document).ready(() => {
       <h6 class="mb-0"> 지금까지 <a href="{% url 'eval_record' %}"><span id="rating-count">{{ rating_count }}</span>개의 영화</a>를 평가해 주셨어요.
       </h6>
     </div>`;
-  $('#container-main').prepend(ratingSticky);
+  $('#sticky-notifications').prepend(ratingSticky);
 
   if ( {{ rating_count }} < 10 ) {
     const ratingIntro =
@@ -28,7 +28,7 @@ $(document).ready(() => {
         <span aria-hidden="true">&times;</span>
       </button>
     </div>`;
-    $('#container-main').prepend(ratingIntro);
+    $('#sticky-notifications').prepend(ratingIntro);
 
     const readyNote =
     `<div id="ready-note" class="alert alert-success d-none alert-dismissible fade show text-center mb-1" role="alert">
@@ -37,11 +37,11 @@ $(document).ready(() => {
         <span aria-hidden="true">&times;</span>
       </button>
     </div>`;
-    $('#container-main').prepend(readyNote);
+    $('#sticky-notifications').prepend(readyNote);
   }
 
   const evalList = JSON.parse('{{ eval_list|safe }}');
-  const loader = new MovieCardLoaderV("#container-movie-cards", 12, 5, StarMovieCard);
+  const loader = new MovieCardLoaderV("#container-movie-cards", 18, 6, StarMovieCard);
   loader.initialize(evalList);
 
 });
@@ -52,7 +52,7 @@ $(document).ready(() => {
 
 
 {% block content %}
-
+<div id="sticky-notifications" class="sticky-top"></div>
 
 <div id="container-movie-cards" class="row"></div>
 
