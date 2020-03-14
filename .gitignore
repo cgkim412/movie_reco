@@ -17,3 +17,4 @@ keys/*
 *.zip
 *.npy
 *.npz
+*/about.html

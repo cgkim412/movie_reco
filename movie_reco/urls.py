@@ -41,4 +41,3 @@ urlpatterns = [
     path('logout/', logout, name='logout'),
     path('register/', RegisterView.as_view(), name='register'),
 ] + api_base_urls + api_urls
-
