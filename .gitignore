@@ -3,6 +3,7 @@
 *.pyc
 *.exe
 *.txt
+migrations
 __pycache__
 .idea/*
 media/*

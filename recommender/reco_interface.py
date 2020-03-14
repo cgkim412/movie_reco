@@ -7,6 +7,7 @@ from movies.models import Movie
 from .matfac import MatrixFactorization
 from .models import Similarity
 from .reco_settings import PARAMS_PATH
+from sklearn.preprocessing import normalize
 
 
 class RecoInterface:
@@ -18,9 +19,9 @@ class RecoInterface:
 
     def __init__(self):
         self.mf = MatrixFactorization()
-        self.mf.load_params("matfac_final")
-        self.tagged_item_ids = Similarity.objects.values('movie_id').distinct().order_by('movie_id').values_list(
-            'movie_id', flat=True)
+        self.mf.load_params("matfac_final_k10")
+        self.tagged_item_ids = np.array(Similarity.objects.values('movie_id').distinct().order_by('movie_id').values_list(
+            'movie_id', flat=True))
         self.all_item_ids = np.arange(1, 9527)
         self.xpc = self._load_xpc()
 
@@ -35,7 +36,12 @@ class RecoInterface:
         return X.tocsr()
 
     def _predict_ratings(self, R):
-        return np.ravel(self.mf.predict_new_hybrid(R))
+        tagged_indices = self.tagged_item_ids - 1
+        pred = np.ravel(self.mf.predict_new_hybrid(R)) # d=9526
+        ## R의 디멘션을 맞춰줘야 됨
+        pref_sim = normalize(R[:,tagged_indices] @ self.xpc) @ normalize(self.xpc).T # d=8048
+        pred[tagged_indices] += 0.2 * np.ravel(pref_sim)
+        return pred
 
     def get_similar_items(self, movie, limit=20):
         return movie.similar_items.all()[:limit].values_list('other_movie__id', flat=True)
@@ -49,11 +55,11 @@ class RecoInterface:
         applicable_ids = xpc.index.values
 
         # Run some test on average vs complete linkages
-        agg = AgglomerativeClustering(n_clusters=None, affinity='cosine', linkage='complete', distance_threshold=0.5)
+        agg = AgglomerativeClustering(n_clusters=None, affinity='cosine', linkage='complete', distance_threshold=0.6)
         clusters = agg.fit_predict(xpc)
 
         count = self._count_occurrences(clusters)
-        major_clusters = sorted(count.keys(), key=count.get, reverse=True)[:10]
+        major_clusters = sorted(count.keys(), key=count.get, reverse=True)[:int(len(movie_ids)/10)]
 
         clustered_items = []
         unlabeled = []
@@ -98,25 +104,29 @@ class RecoInterface:
         ratings = user.ratings.all() # by default ratings are sorted by score in descending order
         R = self._encode_ratings(ratings.values_list("id", "score"))
 
+        rated = set(ratings.values_list('id', flat=True))
+        reco_list = []
+
+        # recommendation by item-item similarity
+        user_favorites = ratings.filter(score__gte=4.0)[:5]
+        for fav in user_favorites:
+            similar_items = np.random.choice(self.get_similar_items(fav.movie, 20), size=min(int(limit/25), 8), replace=False)
+            reco_list += similar_items.tolist()
+
+        # remove items that are already rated by the user
+        reco_list = list(set(reco_list) - rated)
+
         # recommendation by CF
         cf_prediction = self._predict_ratings(R)
         cf_best_items = (-cf_prediction).argsort()[:limit + ratings.count()] + 1 # +1 because DB ids start from 1
+        cf_best_items = list(set(cf_best_items) - rated)
 
-        reco_list = set(cf_best_items)
-
-        # recommendation by item similarity
-        user_favorites = ratings.filter(score__gte=3.5)[:3]
-        for fav in user_favorites:
-            similar_items = self.get_similar_items(fav.movie, 6)
-            for item in similar_items:
-                reco_list.add(item)
-
-        # remove items that are already rated by the user
-        reco_list = list(reco_list - set(ratings.values_list('id', flat=True)))[:limit]
+        reco_list = (reco_list + cf_best_items)[:limit]
+        print(len(reco_list))
 
         # perform clustering and put labels
         clustered_list = self._cluster_and_label(reco_list)
-
+        print(clustered_list)
         return clustered_list
 
     def get_eval_list(self, user, limit=100):
