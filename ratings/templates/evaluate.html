@@ -14,7 +14,7 @@
 
 $(document).ready(() => {
   const ratingSticky =
-    `<div class="alert alert-secondary sticky-top text-center" role="alert">
+    `<div class="alert alert-secondary sticky-top text-center my-0" role="alert">
       <h6 class="mb-0"> 지금까지 <a href="{% url 'eval_record' %}"><span id="rating-count">{{ rating_count }}</span>개의 영화</a>를 평가해 주셨어요.
       </h6>
     </div>`;
@@ -22,22 +22,22 @@ $(document).ready(() => {
 
   if ( {{ rating_count }} < 10 ) {
     const ratingIntro =
-    `<div class="alert alert-warning alert-dismissible fade show text-center mb-1" role="alert">
+    `<div class="alert alert-warning alert-dismissible fade show text-center my-0" role="alert">
       <strong>처음 오셨군요!</strong> 여기서 영화에 점수를 매겨서 당신의 취향을 알려주세요. 많이 해주실수록 좋지만 적어도 10개의 평점이 필요해요.
       <button type="button" class="close" data-dismiss="alert" aria-label="Close" data-toggle="tooltip" data-placement="top" title="닫기">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>`;
-    $('#sticky-notifications').prepend(ratingIntro);
+    $('#sticky-notifications').append(ratingIntro);
 
     const readyNote =
-    `<div id="ready-note" class="alert alert-success d-none alert-dismissible fade show text-center mb-1" role="alert">
+    `<div id="ready-note" class="alert alert-success d-none alert-dismissible fade show text-center my-0" role="alert">
       <strong>수고하셨어요!</strong> 평점을 열심히 매겨 주셨네요. 이제 <a href="{% url 'home' %}">홈</a>으로 가서 추천 영화 목록을 확인해 보세요.
       <button type="button" class="close" data-dismiss="alert" aria-label="Close" data-toggle="tooltip" data-placement="top" title="닫기">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>`;
-    $('#sticky-notifications').prepend(readyNote);
+    $('#sticky-notifications').append(readyNote);
   }
 
   const evalList = JSON.parse('{{ eval_list|safe }}');
