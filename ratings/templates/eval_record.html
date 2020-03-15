@@ -18,7 +18,7 @@ $(document).ready(() => {
       <h6 class="mb-0"> 지금까지 <span id="rating-count">{{ rating_count }}</span>개의 영화를 평가해 주셨어요. 여기서 평가를 수정하실 수 있어요.
       </h6>
     </div>`;
-  $('#container-main').prepend(ratingSticky);
+  $('#notifications').append(ratingSticky);
 
   const ratingData = JSON.parse('{{ record|safe }}');
   const loader = new RatedMovieCardLoader("#container-movie-cards", 10, 5, StarMovieCard);
@@ -32,7 +32,7 @@ $(document).ready(() => {
 
 {% block content %}
 
-
+<div id="notifications" class="mb-2"></div>
 <div id="container-movie-cards" class="row"></div>
 
 
