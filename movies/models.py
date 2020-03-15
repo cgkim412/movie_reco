@@ -31,8 +31,8 @@ class Movie(models.Model):
     tmdb_votes = models.IntegerField(null=True, verbose_name="# of TMDB votes")
     tmdb_popularity = models.FloatField(null=True, verbose_name="TMDB Popularity (daily)")
 
-    is_init_state = models.BooleanField(default=True, verbose_name="Initial state?")
-    tmdb_ok = models.BooleanField(default=False, verbose_name="Got all data from TMDB?")
+    is_init_state = models.BooleanField(default=True, verbose_name="Is initial state?")
+    use_alt_poster = models.BooleanField(default=True, verbose_name="Use alternate poster?")
     last_update = models.DateTimeField(auto_now=True, verbose_name="Last updated on")
 
     def __str__(self):
@@ -90,8 +90,8 @@ class Movie(models.Model):
         self.tmdb_votes = data['vote_count']
         self.tmdb_popularity = data['popularity']
 
-        if self.title_kr and self.overview_kr and self.poster:
-            self.tmdb_ok = True
+        if self.overview_kr:
+            self.use_alt_poster = False
 
         self.save()
 

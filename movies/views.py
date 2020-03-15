@@ -23,14 +23,12 @@ def run_update(movie):
             logger.error(f"Couldn't get movie data from TMDB API: {movie.title} ({movie.release_year})")
         else:
             pass
-            # print(f"Update result: tmdb_ok = {movie.tmdb_ok}")
 
 @method_decorator(login_required, name='dispatch')
 class MovieAPI(APIView):
     def get(self, request, movie_id):
         movie = get_object_or_404(Movie, id=movie_id)
 
-        # print(f"Movie data requested: {movie.title} ({movie.release_year}) | init state: {movie.is_init_state}")
         if movie.is_init_state:
             run_update(movie)
 
@@ -38,10 +36,13 @@ class MovieAPI(APIView):
 
         if movie.overview_kr:
             response_data['overview'] = movie.overview_kr
-            response_data['poster'] = poster_url(movie.poster)
         else:
             response_data['overview'] = movie.overview
+
+        if movie.use_alt_poster:
             response_data['poster'] = movie.alt_poster
+        else:
+            response_data['poster'] = poster_url(movie.poster)
 
         response_data['similar_items'] = RECO_INTERFACE.get_similar_items(movie, 12)
 
@@ -54,16 +55,15 @@ class SimpleMovieAPI(APIView):
     def get(self, request, movie_id):
         movie = get_object_or_404(Movie, id=movie_id)
 
-        # print(f"Movie data requested: {movie.title} ({movie.release_year}) | init state: {movie.is_init_state}")
         if movie.is_init_state:
             run_update(movie)
 
         response_data = SimpleMovieSerializer(movie).data
 
-        if movie.overview_kr:
-            response_data['poster'] = poster_url(movie.poster)
-        else:
+        if movie.use_alt_poster:
             response_data['poster'] = movie.alt_poster
+        else:
+            response_data['poster'] = poster_url(movie.poster)
 
         json = JSONRenderer().render(response_data)
         return Response(json)
