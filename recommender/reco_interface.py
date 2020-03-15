@@ -39,7 +39,6 @@ class RecoInterface:
     def _predict_ratings(self, R):
         tagged_indices = self.tagged_item_ids - 1
         pred = np.ravel(self.mf.predict_new_hybrid(R)) # d=9526
-        ## R의 디멘션을 맞춰줘야 됨
         pref_sim = normalize(R[:,tagged_indices] @ self.xpc) @ normalize(self.xpc).T # d=8048
         pred[tagged_indices] += 0.2 * np.ravel(pref_sim)
         return pred
@@ -55,12 +54,12 @@ class RecoInterface:
         xpc = self.xpc.loc[applicable_ids].copy()
         applicable_ids = xpc.index.values
 
-        # Run some test on average vs complete linkages
+        # Needs more tests on clustering parameters
         agg = AgglomerativeClustering(n_clusters=None, affinity='cosine', linkage='complete', distance_threshold=0.6)
         clusters = agg.fit_predict(xpc)
 
         count = self._count_occurrences(clusters)
-        major_clusters = sorted(count.keys(), key=count.get, reverse=True)[:int(len(movie_ids)/10)]
+        major_clusters = sorted(count.keys(), key=count.get, reverse=True)[:10]
 
         clustered_items = []
         unlabeled = []
@@ -109,9 +108,9 @@ class RecoInterface:
         reco_list = []
 
         # recommendation by item-item similarity
-        user_favorites = ratings.filter(score__gte=4.0)[:5]
+        user_favorites = ratings.filter(score__gte=3.5)[:15]
         for fav in user_favorites:
-            similar_items = np.random.choice(self.get_similar_items(fav.movie, 20), size=min(int(limit/25), 8), replace=False)
+            similar_items = np.random.choice(self.get_similar_items(fav.movie, 20), size=min(int(limit/20), 8), replace=False)
             reco_list += similar_items.tolist()
         reco_list = set(reco_list) - rated
         
