@@ -7,8 +7,12 @@ def login_required(function):
         user = request.session.get('user')
         if user is None or not user:
             return redirect('index')
-        return function(request, *args, **kwargs)
-
+        try:
+            User.objects.get(id=user)
+        except User.DoesNotExist:
+            return redirect('index')
+        else:
+            return function(request, *args, **kwargs)
     return wrap
 
 
