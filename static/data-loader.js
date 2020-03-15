@@ -151,8 +151,8 @@ class ArrowedCardContainer {
     const container = `
     <div class="carousel container-wrapper mt-3" container-id="${this.id}">
       <div class="text-light ml-3 mb-2">
-        <span class="h3">${this.label.join(' / ')}</span>
-        <span class="h4">(${this.numItems}개)</span>
+        <span class="h4">${this.label.join(' / ')}</span>
+        <span class="h5">(${this.numItems}개)</span>
       </div>
       <span class="carousel-control-prev arrow-left" role="button" style="width: 20px;">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
