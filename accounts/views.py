@@ -28,10 +28,12 @@ class LoginView(FormView):
     success_url = reverse_lazy('home')
 
     def get(self, request, *args, **kwargs):
-        if request.session['user']:
-            return redirect('home')
-        else:
+        try:
+            request.session['user']
+        except KeyError:
             return super().get(request, *args, **kwargs)
+        else:
+            return redirect('home')
 
     def form_valid(self, form):
         user = User.objects.get(email=form.data.get('email'))
