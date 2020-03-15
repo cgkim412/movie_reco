@@ -1,17 +1,17 @@
+import logging
+
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .exceptions import UpdateFailed
+
 from accounts.decorators import login_required
+from movies.tmdb import poster_url
+from recommender.reco_interface import RECO_INTERFACE
+from .exceptions import UpdateFailed
 from .models import Movie
 from .serializers import SimpleMovieSerializer, MovieSerializer
-import logging
-from django.http.response import HttpResponse
-from recommender.reco_interface import RECO_INTERFACE
-from django.urls import reverse
-from movies.tmdb import poster_url
 
 logger = logging.getLogger('movie_api')
 

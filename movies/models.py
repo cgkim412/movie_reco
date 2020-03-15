@@ -1,9 +1,9 @@
 import requests
-from django.core.files.base import ContentFile
 from django.db import models
+
 from metadata.models import Country, Language, Company, Genre
 from .exceptions import UpdateFailed
-from .tmdb import api_url, poster_url
+from .tmdb import api_url
 
 
 class Movie(models.Model):
