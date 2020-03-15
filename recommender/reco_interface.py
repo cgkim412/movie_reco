@@ -24,7 +24,6 @@ class RecoInterface:
             'movie_id', flat=True))
         self.all_item_ids = np.arange(1, 9527)
         self.xpc = self._load_xpc(25)
-        print(self.xpc)
 
     def _load_xpc(self, n_components):
         data = np.load(os.path.join(PARAMS_PATH, "movie_features_pc50.npy"))
@@ -66,15 +65,17 @@ class RecoInterface:
         labeled_reco_list = {}
         for label in major_clusters:
             member_ids = applicable_ids[clusters == label].tolist()
-            repr_genres = tuple(self._get_representative_genres(member_ids))
+            repr_genres = self._get_representative_genres(member_ids)
             if not repr_genres:
                 unlabeled += member_ids
                 continue
             try:
-                labeled_reco_list[repr_genres] += member_ids
+                labeled_reco_list[tuple(repr_genres)] += member_ids
             except KeyError:
-                labeled_reco_list[repr_genres] = member_ids
-
+                try:
+                    labeled_reco_list[tuple(repr_genres[::-1])] += member_ids
+                except KeyError:
+                    labeled_reco_list[tuple(repr_genres)] = member_ids
             clustered_items += member_ids
 
         labeled_reco_list[("기타",)] = list(set(movie_ids) - set(clustered_items)) + unlabeled
