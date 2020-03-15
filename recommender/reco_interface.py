@@ -87,7 +87,7 @@ class RecoInterface:
         sorted_ratios = {k: count[k] / len(movie_ids) for k in sorted(count.keys(), key=count.get, reverse=True)}
         repr_genres = []
         for genre, ratio in sorted_ratios.items():
-            if ratio >= 0.5:
+            if ratio >= 0.66:
                 repr_genres.append(genre)
             else:
                 break
