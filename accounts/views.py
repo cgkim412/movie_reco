@@ -27,6 +27,12 @@ class LoginView(FormView):
     form_class = LoginForm
     success_url = reverse_lazy('home')
 
+    def get(self, request, *args, **kwargs):
+        if request.session['user']:
+            return redirect('home')
+        else:
+            return super().get(request, *args, **kwargs)
+
     def form_valid(self, form):
         user = User.objects.get(email=form.data.get('email'))
         self.request.session['user'] = user.id
