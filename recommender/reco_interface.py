@@ -78,7 +78,7 @@ class RecoInterface:
                     labeled_reco_list[tuple(repr_genres)] = member_ids
             clustered_items += member_ids
 
-        labeled_reco_list[("기타",)] = list(set(movie_ids) - set(clustered_items)) + unlabeled
+        labeled_reco_list[("기타",)] = list(set(movie_ids) - set(clustered_items))
         return labeled_reco_list
 
     def _get_representative_genres(self, movie_ids):
