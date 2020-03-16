@@ -1,62 +1,54 @@
-{% extends "base_core.html" %}
-
-{% block header %}
-{% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'star-rating/star-rating-svg.css' %}">
+{% extends "base_core.html" %} {% block header %} {% load static %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'star-rating/star-rating-svg.css' %}"
+/>
 <script src="{% static 'star-rating/jquery.star-rating-svg-customized.js' %}"></script>
 <script src="{% static 'csrf.js' %}"></script>
 <script src="{% static 'cards.js' %}"></script>
 <script src="{% static 'data-loader.js' %}"></script>
 <script>
-  const movieBaseUrl = "{% url 'movie' %}";
-  const evalBaseUrl = "{% url 'evaluate' %}";
-  const csrftoken = getCookie('csrftoken');
+    const movieBaseUrl = "{% url 'movie' %}";
+    const evalBaseUrl = "{% url 'evaluate' %}";
+    const csrftoken = getCookie('csrftoken');
 
-$(document).ready(() => {
-  const ratingSticky =
-    `<div class="alert alert-secondary sticky-top text-center my-0" role="alert">
-      <h6 class="mb-0"> 지금까지 <a href="{% url 'eval_record' %}"><span id="rating-count">{{ rating_count }}</span>개의 영화</a>를 평가해 주셨어요.
-      </h6>
-    </div>`;
-  $('#sticky-notifications').prepend(ratingSticky);
+  $(document).ready(() => {
+    const ratingSticky =
+      `<div class="alert alert-secondary text-center my-0" role="alert">
+        <h6 class="mb-0"> 지금까지 <a href="{% url 'eval_record' %}"><span id="rating-count">{{ rating_count }}</span>개의 영화</a>를 평가해 주셨어요.
+        </h6>
+      </div>`;
+    $('#stickies').append(ratingSticky);
 
-  if ( {{ rating_count }} < 10 ) {
-    const ratingIntro =
-    `<div class="alert alert-warning alert-dismissible fade show text-center my-0" role="alert">
-      <strong>처음 오셨군요!</strong> 여기서 영화에 점수를 매겨서 당신의 취향을 알려주세요. 많이 해주실수록 좋지만 적어도 10개의 평점이 필요해요. 영화 포스터 밑에 있는 별을 클릭 또는 터치해서 평점을 매길 수 있어요.
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close" data-toggle="tooltip" data-placement="top" title="닫기">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>`;
-    $('#sticky-notifications').append(ratingIntro);
+    if ( {{ rating_count }} < 10 ) {
+      const ratingIntro =
+      `<div class="alert alert-warning alert-dismissible fade show text-center my-0" role="alert">
+        <strong>처음 오셨군요!</strong> 여기서 영화에 점수를 매겨서 당신의 취향을 알려주세요. 많이 해주실수록 좋지만 적어도 10개의 평점이 필요해요. 영화 포스터 밑에 있는 별을 클릭 또는 터치해서 평점을 매길 수 있어요.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" data-toggle="tooltip" data-placement="top" title="닫기">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>`;
+      $('#stickies').append(ratingIntro);
 
-    const readyNote =
-    `<div id="ready-note" class="alert alert-success d-none alert-dismissible fade show text-center my-0" role="alert">
-      <strong>수고하셨어요!</strong> 평점을 열심히 매겨 주셨네요. 이제 <a href="{% url 'home' %}">홈</a>으로 가서 추천 영화 목록을 확인해 보세요.
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close" data-toggle="tooltip" data-placement="top" title="닫기">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>`;
-    $('#sticky-notifications').append(readyNote);
-  }
+      const readyNote =
+      `<div id="ready-note" class="alert alert-success d-none alert-dismissible fade show text-center my-0" role="alert">
+        <strong>수고하셨어요!</strong> 평점을 열심히 매겨 주셨네요. 이제 <a href="{% url 'home' %}">홈</a>으로 가서 추천 영화 목록을 확인해 보세요. 물론 여기 남아서 평가를 조금 더 해주셔도 좋아요.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" data-toggle="tooltip" data-placement="top" title="닫기">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>`;
+      $('#stickies').append(readyNote);
+    }
 
-  const evalList = JSON.parse('{{ eval_list|safe }}');
-  const loader = new MovieCardLoaderV("#container-movie-cards", 18, 6, StarMovieCard);
-  loader.initialize(evalList);
+    const evalList = JSON.parse('{{ eval_list|safe }}');
+    const loader = new MovieCardLoaderV("#container-movie-cards", 18, 6, StarMovieCard);
+    loader.initialize(evalList);
 
-});
-
+  });
 </script>
-{% endblock %}
-
-
-
-{% block content %}
-<div id="sticky-notifications" class="sticky-top mb-2"></div>
+{% endblock %} {% block content %}
 
 <div id="container-movie-cards" class="row"></div>
 
-
-
 {% endblock %}
-

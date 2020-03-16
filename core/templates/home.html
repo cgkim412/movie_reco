@@ -1,7 +1,4 @@
-{% extends "base_core.html" %}
-
-{% block header %}
-{% load static %}
+{% extends "base_core.html" %} {% block header %} {% load static %}
 
 <style id="style-lazy">
   .lazy-load {
@@ -10,8 +7,9 @@
 </style>
 
 <style>
-
-  .card-clickable { cursor: pointer; }
+  .card-clickable {
+    cursor: pointer;
+  }
 
   .card-container {
     overflow-x: hidden;
@@ -19,12 +17,6 @@
     scroll-behavior: smooth;
     min-height: 210px;
     margin-bottom: 10px;
-  }
-
-
-  .carousel-control-next-icon {
-    color = red;
-    width = 100px;
   }
 
   @media all and (min-width: 768px) {
@@ -35,39 +27,37 @@
     .container-sim {
       height: 60vh;
     }
-
   }
 </style>
 
 <script src="{% static 'cards.js' %}"></script>
 <script src="{% static 'data-loader.js' %}"></script>
 <script>
-  const movieBaseUrl = "{% url 'movie' %}";
+  const movieBaseUrl = "{% url 'movie' %}"
 
   $(document).ready(() => {
-    const sticky =
-      `<div class="alert alert-secondary sticky-top text-center" role="alert">
-        <h6 class="mb-0"> 제가 추천해 드리는 영화 목록이에요. 평가를 많이 해주실수록 좀 더 취향에 맞는 추천이 가능해요.
-        </h6>
-      </div>`;
-      $('#stickies').append(sticky);
+    const sticky = `<div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+        <h6 class="mb-0"> 제가 추천해 드리는 영화 목록이에요. 평가를 많이 해주실수록 좀 더 취향에 맞는 추천이 가능해요.</h6>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" data-toggle="tooltip" data-placement="top" title="닫기">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>`
+    $('#stickies').append(sticky)
 
-      eventManager.activateAll();
+    eventManager.activateAll()
 
-      const recoList = JSON.parse('{{ reco_list|safe }}');
-      const contLoader = new CardContainerLoader("#container-main", 3, 1, ArrowedCardContainer);
-      contLoader.initialize(recoList);
+    const recoList = JSON.parse('{{ reco_list|safe }}')
+    const contLoader = new CardContainerLoader(
+      '#container-main',
+      3,
+      1,
+      ArrowedCardContainer
+    )
+    contLoader.initialize(recoList)
   })
-
-
 </script>
-{% endblock %}
-
-
-
-{% block content %}
+{% endblock %} {% block content %}
 
 <div id="container-modal"></div>
 
 {% endblock %}
-

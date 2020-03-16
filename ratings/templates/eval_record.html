@@ -1,40 +1,45 @@
-{% extends "base_core.html" %}
-
-{% block header %}
-{% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'star-rating/star-rating-svg.css' %}">
+{% extends "base_core.html" %} {% block header %} {% load static %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'star-rating/star-rating-svg.css' %}"
+/>
 <script src="{% static 'star-rating/jquery.star-rating-svg-customized.js' %}"></script>
 <script src="{% static 'csrf.js' %}"></script>
 <script src="{% static 'cards.js' %}"></script>
 <script src="{% static 'data-loader.js' %}"></script>
 <script>
-  const movieBaseUrl = "{% url 'movie' %}";
-  const evalBaseUrl = "{% url 'evaluate' %}";
-  const csrftoken = getCookie('csrftoken');
+  const movieBaseUrl = "{% url 'movie' %}"
+  const evalBaseUrl = "{% url 'evaluate' %}"
+  const csrftoken = getCookie('csrftoken')
 
-$(document).ready(() => {
-  const ratingSticky =
-    `<div class="alert alert-secondary sticky-top text-center" role="alert">
-      <h6 class="mb-0"> 지금까지 <span id="rating-count">{{ rating_count }}</span>개의 영화를 평가해 주셨어요. 여기서 평가를 수정하실 수 있어요.
+  $(document).ready(() => {
+    const ratingSticky = `<div class="alert alert-secondary text-center my-0" role="alert">
+      <h6 class="mb-0"> 지금까지 <span id="rating-count">{{ rating_count }}</span>개의 영화를 평가해 주셨어요.
       </h6>
-    </div>`;
-  $('#notifications').append(ratingSticky);
+    </div>`
+    $('#stickies').append(ratingSticky)
 
-  const ratingData = JSON.parse('{{ record|safe }}');
-  const loader = new RatedMovieCardLoader("#container-movie-cards", 10, 5, StarMovieCard);
-  loader.initialize(ratingData);
+    const ratingSticky2 = `<div id="ready-note" class="alert alert-warning alert-dismissible fade show text-center my-0" role="alert">
+        평점을 수정하고 싶으신가요? 여기서 하실 수 있어요.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" data-toggle="tooltip" data-placement="top" title="닫기">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>`
+    $('#stickies').append(ratingSticky2)
 
-})
-
+    const ratingData = JSON.parse('{{ record|safe }}')
+    const loader = new RatedMovieCardLoader(
+      '#container-movie-cards',
+      10,
+      5,
+      StarMovieCard
+    )
+    loader.initialize(ratingData)
+  })
 </script>
-{% endblock %}
+{% endblock %} {% block content %}
 
-
-{% block content %}
-
-<div id="notifications" class="mb-2"></div>
 <div id="container-movie-cards" class="row"></div>
 
-
 {% endblock %}
-

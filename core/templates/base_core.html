@@ -1,31 +1,30 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block base_header %} {% block header %}
+<style>
+  .container {
+    max-width: 1280px;
+  }
 
-{% block base_header %}
-  {% block header %}
-  <style>
-    .container {
-      max-width: 1280px;
-    }
+  #container-main {
+    height: 100vh;
+  }
+</style>
 
-    #container-main {
-      height: 100vh;
-    }
-  </style>
-
-  {% endblock %}
-{% endblock %}
-
-
-{% block base_content %}
-
-<div class="container">
+{% endblock %} {% endblock %} {% block base_content %}
+<div id="container-main" class="container px-0">
   <div id="stickies" class="sticky-top">
     <nav class="navbar navbar-expand-md navbar-dark bg-dark">
       <a class="navbar-brand" href="{% url 'home' %}">
         <div class="text-warning">MovieReco!</div>
       </a>
-      <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#main-navbar"
-              aria-controls="main-navbar" aria-expanded="false" aria-label="Toggle navigation">
+      <button
+        class="navbar-toggler ml-auto"
+        type="button"
+        data-toggle="collapse"
+        data-target="#main-navbar"
+        aria-controls="main-navbar"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="main-navbar">
@@ -44,7 +43,6 @@
           </li>
         </ul>
         <ul class="navbar-nav ml-auto">
-
           {% if request.session.user %}
           <li id="logout" class="nav-item">
             <a class="nav-link" href="{% url 'logout' %}">로그아웃</a>
@@ -61,19 +59,20 @@
       </div>
     </nav>
   </div>
-</div>
-
-<div id="container-main" class="container px-0">
-  {% block content %}
-  {% endblock %}
+  {% block content %} {% endblock %}
 </div>
 
 <script>
-  $('#stickies .navbar li').each( function() {
-    if ( "{{ request.path }}" == $(this).find('a').attr('href') ) {
-      $(this).toggleClass('active');
+  $('#stickies .navbar li').each(function () {
+    if (
+      '{{ request.path }}' ==
+      $(this)
+        .find('a')
+        .attr('href')
+    ) {
+      $(this).toggleClass('active')
     }
-  });
+  })
 </script>
 
 {% endblock %}
