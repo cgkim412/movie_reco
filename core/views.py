@@ -28,7 +28,6 @@ def index(request):
 def home(request):
     user = get_user_obj(request)
 
-    # redirect to evaluation page if user has less than 10 ratings
     if user.ratings.all().count() < 10:
         return redirect('evaluate')
 
