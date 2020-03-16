@@ -61,13 +61,11 @@ class RecoInterface:
         major_clusters = sorted(count.keys(), key=count.get, reverse=True)[:10]
 
         clustered_items = []
-        unlabeled = []
         labeled_reco_list = {}
         for label in major_clusters:
             member_ids = applicable_ids[clusters == label].tolist()
             repr_genres = self._get_representative_genres(member_ids)
             if not repr_genres:
-                unlabeled += member_ids
                 continue
             try:
                 labeled_reco_list[tuple(repr_genres)] += member_ids
