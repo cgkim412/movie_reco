@@ -37,6 +37,7 @@ class RatingAPI(APIView):
 
     def rating_to_json(self, obj):
         serialized_data = RatingSerializer(obj).data
+        serialized_data['rating_count'] = obj.user.ratings.count()
         return JSONRenderer().render(serialized_data)
 
     def get(self, request, movie_id):

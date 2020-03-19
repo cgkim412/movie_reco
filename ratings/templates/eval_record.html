@@ -28,7 +28,7 @@
       </div>`;
     $("#stickies").append(ratingSticky2);
 
-    const ratingData = JSON.parse("{{ record|safe }}");
+    const ratingData = JSON.parse('{{ record|safe }}');
     const loader = new RatedMovieCardLoader(
       "#container-movie-cards",
       10,
