@@ -62,8 +62,7 @@ class StarMovieCard extends BaseMovieCard {
     }
 
     _renderTemplate(movie) {
-        const card = `
-        <div class="col-6 col-md-4 col-lg-3 px-0 mx-0">
+        const card = `<div class="col-6 col-md-4 col-lg-3 px-0 mx-0">
             <div id="${this.cardId}" class="card h-100 mb-1 border-black text-white bg-dark">
                 <div class="card-header border-dark" style="background: url(${movie.poster}); background-position: center center;
                 background-size: contain; background-repeat: no-repeat; min-height: 250px; max-height:400px;"></div>
@@ -71,9 +70,7 @@ class StarMovieCard extends BaseMovieCard {
                     <h6 class="card-title mb-0">${movie.title_kr} (${movie.release_year})</h6>
                 </div>
                 <div class="text-center mt-0 mb-3" id="${this.ratingId}"></div>
-            </div>
-        </div>
-        `
+            </div></div>`
         return card
     }
 }
@@ -85,14 +82,11 @@ class MoviePosterCard extends BaseMovieCard {
     }
 
     _renderTemplate(movie) {
-        const card = `
-        <div class="col-4 col-lg-3 px-0 mx-0 my-0 my-lg-1">
+        const card = `<div class="col-4 col-lg-3 px-0 mx-0 my-0 my-lg-1">
             <div id="${this.cardId}" class="card h-100 my-0 mx-1 mx-md-2 mx-lg-3 bg-dark text-light" movie-id="${movie.id}">
                 <div class="card-header card-clickable h-100 movie-poster border-dark" style="background: url(${movie.poster}); background-position: center center;
                 background-size: contain; background-repeat: no-repeat; min-height: 150px;"></div>
-            </div>
-        </div>
-        `
+            </div></div>`
         return card
     }
 }
@@ -103,16 +97,13 @@ class SimpleMovieCard extends BaseMovieCard {
         this.cardId = 'movie-card-simple-' + movieId
     }
     _renderTemplate(movie) {
-        const card = `
-        <div class="col-4 col-lg-3 px-0 mx-0">
+        const card = `<div class="col-4 col-lg-3 px-0 mx-0">
             <div id="${this.cardId}" class="card h-100 mx-0 my-0 bg-dark text-light" movie-id="${movie.id}">
                 <div class="lazy-load card-header card-clickable h-100 mx-1 mx-md-2 mx-lg-3 border-dark" style="background: url(${movie.poster}); background-position: center center;
                 background-size: contain; background-repeat: no-repeat; min-height: 180px;"></div>
                 <div class="card-body mx-auto my-auto px-0 pt-0 pb-1 text-center" style="min-height: 60px;">
                 <p class="h6 card-title simple-title mb-0">${movie.title_kr} (${movie.release_year})</p></div>
-            </div>
-        </div>
-        `
+            </div></div>`
         return card
     }
 
@@ -150,8 +141,7 @@ class DetailedMovieCard extends BaseMovieCard {
             readMore = ''
         }
         const simContainer = this._renderSimContainerDiv(movie)
-        const card = `
-        <div id="${this.cardId}" class="card bg-dark text-light">
+        const card = `<div id="${this.cardId}" class="card bg-dark text-light">
             <div class="card-header px-0 py-0 border-dark" style="background: url(${
             movie.poster
             }); background-position: center center;
@@ -187,23 +177,19 @@ class DetailedMovieCard extends BaseMovieCard {
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span class="text-light my-0 h1" aria-hidden="true">&times;</span>
                 </button>
-            </div>
-        </div>
-        `
+            </div></div>`
         return card
     }
 
     _renderSimContainerDiv(data) {
         let html = null
         if (data.similar_items.length > 0) {
-            html = `
-            <div class="card-body text-center mx-0 px-0">
+            html = `<div class="card-body text-center mx-0 px-0">
                 <button class="btn btn-outline-warning show-similar-items mb-2" type="button"
                     data-toggle="collapse" data-target="#${this._simContainerId}">
                     비슷한 영화 보기
                 </button>
-                <div id="${this._simContainerId}" class="container-sim row collapse mx-0 px-0"></div>
-            </div>`
+                <div id="${this._simContainerId}" class="container-sim row collapse mx-0 px-0"></div></div>`
         } else {
             html = ''
         }
@@ -273,8 +259,7 @@ class DetailedMovieCard extends BaseMovieCard {
         const modal = `<div id="modal-${data.id}" class="modal">
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div class="modal-content">${card}</div>
-            </div>
-        </div>`
+            </div></div>`
         return modal
     }
 }
