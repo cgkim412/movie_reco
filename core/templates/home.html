@@ -34,6 +34,8 @@
 <script src="{% static 'data-loader.js' %}"></script>
 <script>
   const movieBaseUrl = "{% url 'movie' %}"
+  const recoListUrl = "{% url 'recommendation' %}"
+  console.log(recoListUrl)
 
   $(document).ready(() => {
     const sticky = `<div class="alert alert-success alert-dismissible fade show text-center" role="alert">
@@ -46,14 +48,19 @@
 
     eventManager.activateAll()
 
-    const recoList = JSON.parse('{{ reco_list|safe }}')
-    const contLoader = new CardContainerLoader(
-      '#container-main',
-      3,
-      1,
-      ArrowedCardContainer
-    )
-    contLoader.initialize(recoList)
+    $.ajax({
+      dataType: 'json',
+      url: recoListUrl + '100/',
+      success: function (response) {
+        const contLoader = new CardContainerLoader(
+          '#container-main',
+          3,
+          1,
+          ArrowedCardContainer
+        )
+        contLoader.initialize(JSON.parse(response))
+      }
+    })
   })
 </script>
 {% endblock %} {% block content %}

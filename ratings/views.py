@@ -18,7 +18,6 @@ def evaluate(request):
     user = User.objects.get(id=request.session.get('user'))
     eval_list = RECO_INTERFACE.get_eval_list(user, limit=100)
     json = JSONRenderer().render(eval_list)
-
     rating_count = user.ratings.all().count()
     return render(request, 'evaluate.html', {'rating_count': rating_count, 'eval_list': json.decode('utf8')})
 
