@@ -16,12 +16,12 @@ class RecoInterface:
     All machine learning operations must be handled by this interface alone.
     Other parts of the web application should remain completely ignorant of the inner workings of ML algorithms.
     """
-
     def __init__(self):
         self.mf = MatrixFactorization()
-        self.mf.load_params("matfac_final_k10")
-        self.tagged_item_ids = np.array(Similarity.objects.values('movie_id').distinct().order_by('movie_id').values_list(
-            'movie_id', flat=True))
+        self.mf.load("final_151k")
+        self.mf.verbose = False
+        self.tagged_item_ids = np.array(Similarity.objects.values('movie_id').distinct().
+                                        order_by('movie_id').values_list('movie_id', flat=True))
         self.all_item_ids = np.arange(1, 9527)
         self.xpc = self._load_xpc(25)
 
@@ -37,26 +37,23 @@ class RecoInterface:
 
     def _predict_ratings(self, R):
         tagged_indices = self.tagged_item_ids - 1
-        pred = np.ravel(self.mf.predict_new_hybrid(R)) # d=9526
+        pred = self.mf.predict_new(R, alpha=0.05, lmbda=0.001, n_iter=20, solve=False) # d=9526
         pref_sim = normalize(R[:,tagged_indices] @ self.xpc) @ normalize(self.xpc).T # d=8048
-        pred[tagged_indices] += 0.2 * np.ravel(pref_sim)
+        pred[tagged_indices] += 0.2 * pref_sim.flatten()
         return pred
 
     def get_similar_items(self, movie, limit=20):
         return movie.similar_items.all()[:limit].values_list('other_movie__id', flat=True)
 
-    def decode_prediction(self, prediction):
-        pass
-
-    def _cluster_and_label(self, movie_ids):
+    def _cluster_and_label(self, movie_ids, linkage='complete', threshold=0.5):
         applicable_ids = sorted(list(set(self.tagged_item_ids).intersection(set(movie_ids))))
         xpc = self.xpc.loc[applicable_ids].copy()
         applicable_ids = xpc.index.values
 
         # Needs more tests on clustering parameters
-        agg = AgglomerativeClustering(n_clusters=None, affinity='cosine', linkage='complete', distance_threshold=0.6)
+        agg = AgglomerativeClustering(n_clusters=None, affinity='cosine', linkage=linkage,
+                                      distance_threshold=threshold)
         clusters = agg.fit_predict(xpc)
-
         count = self._count_occurrences(clusters)
         major_clusters = sorted(count.keys(), key=count.get, reverse=True)[:10]
 
@@ -64,16 +61,16 @@ class RecoInterface:
         labeled_reco_list = {}
         for label in major_clusters:
             member_ids = applicable_ids[clusters == label].tolist()
-            repr_genres = self._get_representative_genres(member_ids)
+            repr_genres = tuple(self._get_representative_genres(member_ids))
             if not repr_genres:
                 continue
             try:
-                labeled_reco_list[tuple(repr_genres)] += member_ids
+                labeled_reco_list[repr_genres] += member_ids
             except KeyError:
                 try:
-                    labeled_reco_list[tuple(repr_genres[::-1])] += member_ids
+                    labeled_reco_list[repr_genres[::-1]] += member_ids
                 except KeyError:
-                    labeled_reco_list[tuple(repr_genres)] = member_ids
+                    labeled_reco_list[repr_genres] = member_ids
             clustered_items += member_ids
 
         labeled_reco_list[("기타",)] = list(set(movie_ids) - set(clustered_items))
@@ -107,16 +104,20 @@ class RecoInterface:
         reco_list = []
 
         # recommendation by item-item similarity
-        user_favorites = ratings.filter(score__gte=3.5)[:15]
+        user_favorites = ratings.filter(score__gte=4.0)[:15]
         for fav in user_favorites:
-            similar_items = np.random.choice(self.get_similar_items(fav.movie, 20), size=min(int(limit/20), 8), replace=False)
+            similar_items = np.random.choice(self.get_similar_items(fav.movie, 20),
+                                             size=4, replace=False)
             reco_list += similar_items.tolist()
+
         reco_list = set(reco_list) - rated
-        
+
         # recommendation by CF
         cf_prediction = self._predict_ratings(R)
-        cf_best_items = (-cf_prediction).argsort()[:limit + ratings.count()] + 1 # +1 because DB ids start from 1
+        cf_best_items = (-cf_prediction).argsort().copy()[:limit + ratings.count()] + 1 # +1 because DB ids start from 1
+        print(Movie.objects.filter(id__in=cf_best_items).values_list('title', 'imdb_score'))
 
+        # fill up to limit
         for item in cf_best_items:
             if item not in rated:
                 reco_list.add(item)
@@ -124,8 +125,39 @@ class RecoInterface:
                     break
 
         # perform clustering and put labels
-        clustered_list = self._cluster_and_label(list(reco_list))
-        return clustered_list
+        clustered_list = self._cluster_and_label(reco_list, linkage='complete', threshold=0.6)
+
+        # partially re-cluster with relaxed constraints if too many items are labels as "기타"
+        reclustered_items = self._partial_reclustering(clustered_list, ('기타',), linkage='average', threshold=0.6)
+
+        return reclustered_items
+
+    def _partial_reclustering(self, labeled_items, key, linkage, threshold):
+        etcetera = labeled_items[key]
+        clustered_items = labeled_items.copy()
+        if len(etcetera) > 20:
+            reclustered = self._cluster_and_label(etcetera, linkage=linkage, threshold=threshold)
+            del reclustered[key]
+            moved_items = []
+            for label, items in reclustered.items():
+                try:
+                    clustered_items[label] += items
+                except KeyError:
+                    try:
+                        clustered_items[label[::-1]] += items
+                    except KeyError:
+                        if len(items) > 3:
+                            clustered_items[label] = items
+                            moved_items += items
+                    else:
+                        moved_items += items
+                else:
+                    moved_items += items
+            new_etc = list(set(etcetera) - set(moved_items))
+            del clustered_items[key]
+            clustered_items[key] = new_etc
+
+        return clustered_items
 
     def get_eval_list(self, user, limit=100):
         rated_movies = user.ratings.values_list('movie', flat=True)
