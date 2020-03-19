@@ -2,88 +2,76 @@ import os
 import numpy as np
 from scipy.sparse import csr_matrix, dia_matrix
 from scipy.sparse.linalg import svds
+from sklearn.preprocessing import normalize
 from .reco_settings import PARAMS_PATH
 
 
 class MatrixFactorization():
-    def __init__(self, K=8, alpha=0.1, lmbda=0.02, decay=0.1, momentum=0.9, batch_size=None, n_iter=10, init_method="svd", max_size=1024):
+    def __init__(self, K=8, use_biases=True, alpha=0.1, lmbda=0.01, decay=0.1, momentum=0.75,
+                 batch_size=50, batch_growth=1.0, max_size=1024,
+                 init_method="random", verbose=False):
+        if init_method not in ("svd", "random"):
+            print("Error: valid init_method arguments are: ['svd', 'random']")
+            raise ValueError
         self.K = K
+        self.use_biases = use_biases
         self.alpha = alpha
+        self.alpha_ = None
         self.lmbda = lmbda
         self.decay = decay
         self.batch_size = batch_size
+        self.batch_size_ = None
+        self.batch_growth = batch_growth
         self.max_size = max_size
-        self.n_iter = n_iter
         self.init_method = init_method
         self.momentum = momentum
         self.U = None
         self.V = None
-        self.D = None
         self.mu = None
         self.user_bias = None
         self.item_bias = None
         self.grad_v = None
+        self.is_initialized = False
+        self.n_epochs_ = 0
+        self.verbose = verbose
 
-    def _initialize_parameters(self, X):
+    def _initialize_parameters(self, X: csr_matrix):
         n, d = X.shape
-        self.mu = X.data.mean()
-        self.D = csr_matrix(X, dtype=bool)
-
+        if self.use_biases:
+            self.mu = X.data.mean()
+        else:
+            self.mu = 0
         if self.init_method == "svd":
             R = X.copy()
-            R.data -= R.data.mean()
+            if self.use_biases:
+                R.data -= R.data.mean()
             u, s, vt = svds(R, k=self.K)
-            self.U = u * np.sqrt(s) / 2
-            self.V = vt.T * np.sqrt(s) / 2
+            self.U = u
+            self.V = vt.T
         else:
             self.U = np.random.normal(scale=0.1, size=(n, self.K))
             self.V = np.random.normal(scale=0.1, size=(d, self.K))
 
         self.user_bias = np.zeros(n)
         self.item_bias = np.zeros(d)
+        self.is_initialized = True
 
-    def _set_batch_size(self, n):
-        if self.batch_size is None:
-            batch_size = n
-        elif self.batch_size == "auto":
-            batch_size = n // 20 + 1
-            print('Auto-chosen batch size:', batch_size)
-        elif self.batch_size == "adaptive":
-            if n < 1000:
-                print('Data is too small to use adaptive batch; setting it to auto.')
-                batch_size = n // 20 + 1,
-            else:
-                batch_size = n // 120 + 1
-        else:
-            batch_size = self.batch_size
-        return min(min(self.max_size, batch_size), n)
-
-    def train(self, X: csr_matrix):
+    def _run_single_epoch(self, X: csr_matrix, batch_size: int, alpha: float):
         n, d = X.shape
-        growth_rate = 1.25
-        batch_size = self._set_batch_size(n)
-
-        self._initialize_parameters(X)
-        indices = list(range(n))
-
-        for i in range(self.n_iter):
-            np.random.shuffle(indices)
-            alpha = self.alpha / (1 + i * self.decay)
-
-            if self.batch_size == "adaptive":
-                batch_size = min(min(int(batch_size * growth_rate), self.max_size), n)
-
-            for j in range(int(n / batch_size)):
-                batch_start = j * batch_size
-                batch_end = batch_start + batch_size
-                batch_indices = indices[batch_start:batch_end]
-                batch_X = X[batch_indices]
-                if batch_X.shape[0] == 0: continue
-                self._gradient_descent(batch_X, batch_indices, alpha=alpha)
+        indices = np.random.permutation(np.arange(n))
+        for i in range(int(n / batch_size)):
+            batch_start = i * batch_size
+            batch_end = batch_start + batch_size
+            batch_indices = indices[batch_start:batch_end]
+            X_batch = X[batch_indices]
+            if X_batch.shape[0] == 0:
+                continue
+            self._gradient_descent(X_batch, batch_indices, alpha=alpha)
+        self.n_epochs_ += 1
 
     def _gradient_descent(self, X: csr_matrix, batch_indices, alpha):
         U = self.U[batch_indices]
-        D = self.D[batch_indices]
+        D = csr_matrix(X, dtype=bool)
         user_bias = self.user_bias[batch_indices]
         E = X - D.multiply(self._predict(U, self.V, user_bias))
 
@@ -104,13 +92,56 @@ class MatrixFactorization():
         user_error_sums = np.ravel(E.sum(axis=1))
         item_error_sums = np.ravel(E.sum(axis=0))
 
-        with np.errstate(divide='ignore', invalid='ignore'):
-            self.user_bias[batch_indices] += alpha * (
-                    np.where(user_error_sums == 0, 0, user_error_sums / np.ravel(D.sum(axis=1)))
-                    - self.lmbda * user_bias)
-            self.item_bias += alpha * (
-                    np.where(item_error_sums == 0, 0, item_error_sums / np.ravel(D.sum(axis=0)))
-                    - self.lmbda * self.item_bias)
+        if self.use_biases:
+            with np.errstate(divide='ignore', invalid='ignore'):
+                self.user_bias[batch_indices] += alpha * (
+                        np.where(user_error_sums == 0, 0, user_error_sums / np.ravel(D.sum(axis=1)))
+                        - self.lmbda * user_bias)
+                self.item_bias += alpha * (
+                        np.where(item_error_sums == 0, 0, item_error_sums / np.ravel(D.sum(axis=0)))
+                        - self.lmbda * self.item_bias)
+
+    def _calculate_batch_size(self, n):
+        return min(self.batch_size, self.max_size, n)
+
+    def train(self, X: csr_matrix, n_epochs: int):
+        n, d = X.shape
+
+        if not isinstance(n_epochs, int):
+            print("Invalid type given for parameter n_epochs. Integer object expected.")
+            raise TypeError
+        elif n_epochs <= 0:
+            print("Invalid value given for parameter n_epochs. Positive integer expected.")
+            raise ValueError
+
+        if not self.is_initialized:
+            self._initialize_parameters(X)
+
+        for i in range(n_epochs):
+            if self.batch_size_ is not None:
+                batch_size = self.batch_size_
+            else:
+                batch_size = self._calculate_batch_size(n)
+            if self.alpha_ is not None:
+                alpha = self.alpha_
+            else:
+                alpha = self.alpha
+
+            self._run_single_epoch(X, batch_size, alpha)
+
+            self.batch_size_ = min(int(batch_size * self.batch_growth), self.max_size, n)
+            self.alpha_ = alpha / (1 + self.decay)
+
+            if self.verbose:
+                print("")
+                print(f"Epoch #{self.n_epochs_} | batch size: {batch_size}, alpha: {alpha}")
+                print("Norms: |  Bu  |  Bi  |  U  |  V  |")
+                print("       ", np.round([
+                    np.linalg.norm(self.user_bias),
+                    np.linalg.norm(self.item_bias),
+                    np.linalg.norm(self.U),
+                    np.linalg.norm(self.V)
+                ], 2))
 
     def _predict(self, U=None, V=None, user_bias=None, clip=False):
         if U is None:
@@ -121,9 +152,12 @@ class MatrixFactorization():
             user_bias = self.user_bias
         prediction = np.dot(U, V.T) + self.mu + user_bias.reshape(-1, 1) + self.item_bias
         if clip:
-            return np.minimum(np.maximum(prediction, 0.5), 5.0)
+            return np.clip(prediction, 0.5, 5.0)
         else:
             return prediction
+
+    def get_prediction_sample(self, user_index, clip=True):
+        return self._predict(U=self.U[user_index], user_bias=self.user_bias[user_index], clip=clip)
 
     def _solve_for_u(self, X: csr_matrix, user_bias, lmbda):
         '''
@@ -136,55 +170,37 @@ class MatrixFactorization():
         )
         return U
 
-    def predict_new_solve(self, X: csr_matrix, lmbda=0.5, clip=True):
+    def predict_new(self, X: csr_matrix, alpha=0.05, n_iter=20, lmbda=0.5, solve=False, clip=True):
         '''
-        predicts a new user's ratings by directly solving the equation.
-        expected shape of X is (1, d).
-        '''
-        user_bias = np.zeros(1)
-        U = self._solve_for_u(X, user_bias, lmbda)
-        return self._predict(U, self.V, user_bias, clip)
-
-    def predict_new_gd(self, X: csr_matrix, alpha=0.01, n_iter=20, clip=True):
-        '''
-        predicts a new user's ratings by gradient descent method.
-        expected shape of X is (1, d).
+        Expected shape of X is (1, d).
         '''
         D = csr_matrix(X, dtype=bool)
+        count = D.count_nonzero()
         user_bias = np.zeros(1)
-        U = np.random.normal(scale=1/self.K, size=(1, self.K))
+
+        if solve:
+            U = 0.5 * normalize(self._solve_for_u(X, user_bias, lmbda))
+        else:
+            U = np.random.normal(scale=1 / self.K, size=(1, self.K))
+
         for i in range(n_iter):
             E = X - D.multiply(self._predict(U, self.V, user_bias))
-            U += alpha * (E @ self.V - self.lmbda * U)
-            user_bias += alpha * (E.data.mean() - self.lmbda * user_bias)
-        return self._predict(U, self.V, user_bias, clip)
+            U += alpha * ((E @ self.V) / count - lmbda * U)
+            # user_bias += alpha * (E.data.mean() - lmbda * user_bias)
+        if self.verbose:
+            print("||U|| =", np.linalg.norm(U))
+            # print("Bu =", user_bias)
 
-    def predict_new_hybrid(self, X: csr_matrix, alpha=0.01, lmbda=0.5, n_iter=10, clip=True):
-        '''
-        combines both Solve/GD methods
-        '''
-        D = csr_matrix(X, dtype=bool)
-        user_bias = np.zeros(1)
-        U = self._solve_for_u(X, user_bias, lmbda)
-        for i in range(n_iter):
-            E = X - D.multiply(self._predict(U, self.V, user_bias))
-            U += alpha * (E @ self.V - lmbda * U)
-            user_bias += alpha * (E.data.mean() - lmbda * user_bias)
-        return self._predict(U, self.V, user_bias, clip)
+        return self._predict(U, self.V, user_bias, clip).flatten()
 
-    def save_params(self, prefix=""):
+    def save(self, prefix="", compact=False):
         prefix = os.path.join(PARAMS_PATH, prefix)
-        np.savez(prefix + "_params", V=self.V, item_bias=self.item_bias, K=self.K, lmbda=self.lmbda, mu=self.mu)
+        state = self.__dict__.copy()
+        if compact:
+            for key in 'U user_bias grad_v'.split():
+                state[key] = None
+        np.save(prefix + "_mfstate", state)
 
-    def load_params(self, prefix=""):
+    def load(self, prefix=""):
         prefix = os.path.join(PARAMS_PATH, prefix)
-        params = np.load(prefix + "_params.npz")
-        for key, val in params.items():
-            try:
-                val = val.item()
-            except ValueError:
-                pass
-            else:
-                if key == 'K':
-                    val = int(val)
-            self.__dict__[key] = val
+        self.__dict__ = np.load(prefix + "_mfstate.npy", allow_pickle=True).item()
