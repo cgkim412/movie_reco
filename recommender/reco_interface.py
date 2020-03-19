@@ -98,24 +98,23 @@ class RecoInterface:
 
     def get_recommendation(self, user, limit=100):
         ratings = user.ratings.all() # by default ratings are sorted by score in descending order
-        R = self._encode_ratings(ratings.values_list("id", "score"))
-
-        rated = set(ratings.values_list('id', flat=True))
+        R = self._encode_ratings(ratings.values_list("movie__id", "score"))
+        rated = set(ratings.values_list('movie__id', flat=True))
         reco_list = []
 
         # recommendation by item-item similarity
         user_favorites = ratings.filter(score__gte=4.0)[:15]
         for fav in user_favorites:
             similar_items = np.random.choice(self.get_similar_items(fav.movie, 20),
-                                             size=4, replace=False)
+                                             size=50//len(user_favorites),
+                                             replace=False)
             reco_list += similar_items.tolist()
 
         reco_list = set(reco_list) - rated
 
         # recommendation by CF
         cf_prediction = self._predict_ratings(R)
-        cf_best_items = (-cf_prediction).argsort().copy()[:limit + ratings.count()] + 1 # +1 because DB ids start from 1
-        print(Movie.objects.filter(id__in=cf_best_items).values_list('title', 'imdb_score'))
+        cf_best_items = cf_prediction.argsort()[::-1][:limit + ratings.count()] + 1 # +1 because DB ids start from 1
 
         # fill up to limit
         for item in cf_best_items:
@@ -128,35 +127,37 @@ class RecoInterface:
         clustered_list = self._cluster_and_label(reco_list, linkage='complete', threshold=0.6)
 
         # partially re-cluster with relaxed constraints if too many items are labels as "기타"
-        reclustered_items = self._partial_reclustering(clustered_list, ('기타',), linkage='average', threshold=0.6)
+        if len(clustered_list[('기타',)]) > 20:
+            clustered_list = self._partial_reclustering(clustered_list, ('기타',), linkage='average', threshold=0.5)
 
-        return reclustered_items
+        return clustered_list
 
     def _partial_reclustering(self, labeled_items, key, linkage, threshold):
         etcetera = labeled_items[key]
         clustered_items = labeled_items.copy()
-        if len(etcetera) > 20:
-            reclustered = self._cluster_and_label(etcetera, linkage=linkage, threshold=threshold)
-            del reclustered[key]
-            moved_items = []
-            for label, items in reclustered.items():
+        reclustered = self._cluster_and_label(etcetera, linkage=linkage, threshold=threshold)
+        del reclustered[key]
+        moved_items = []
+        for label, items in reclustered.items():
+            try:
+                clustered_items[label] += items
+            except KeyError:
                 try:
-                    clustered_items[label] += items
+                    clustered_items[label[::-1]] += items
                 except KeyError:
-                    try:
-                        clustered_items[label[::-1]] += items
-                    except KeyError:
-                        if len(items) > 3:
-                            clustered_items[label] = items
-                            moved_items += items
-                    else:
+                    if len(items) > 3:
+                        clustered_items[label] = items
                         moved_items += items
+                        # print(f'{label} 카테고리 새로 생성하여 아이템 {len(items)}개 이동')
                 else:
+                    # print(f'{label[::-1]} 카테고리로 아이템 {len(items)}개 이동')
                     moved_items += items
-            new_etc = list(set(etcetera) - set(moved_items))
-            del clustered_items[key]
-            clustered_items[key] = new_etc
-
+            else:
+                # print(f'{label} 카테고리로 아이템 {len(items)}개 이동')
+                moved_items += items
+        new_etc = list(set(etcetera) - set(moved_items))
+        del clustered_items[key]
+        clustered_items[key] = new_etc
         return clustered_items
 
     def get_eval_list(self, user, limit=100):
