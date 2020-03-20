@@ -24,10 +24,15 @@ class RecoInterface:
                                         order_by('movie_id').values_list('movie_id', flat=True))
         self.all_item_ids = np.arange(1, 9527)
         self.xpc = self._load_xpc(25)
+        self.temporal_decay = self._compute_temporal_decay(2010, 0.01)
 
     def _load_xpc(self, n_components):
         data = np.load(os.path.join(PARAMS_PATH, "movie_features_pc50.npy"))
         return pd.DataFrame(data, index=self.tagged_item_ids)[np.arange(n_components)]
+
+    def _compute_temporal_decay(self, threshold, decay_rate):
+        years = np.array(Movie.objects.order_by('id').values_list('release_year', flat=True))
+        return np.clip(years - threshold, None, 0) * decay_rate
 
     def _encode_ratings(self, ratings_list):
         X = dok_matrix((1, 9526))
@@ -38,8 +43,9 @@ class RecoInterface:
     def _predict_ratings(self, R):
         tagged_indices = self.tagged_item_ids - 1
         pred = self.mf.predict_new(R, alpha=0.05, lmbda=0.001, n_iter=20, solve=False) # d=9526
-        pref_sim = normalize(R[:,tagged_indices] @ self.xpc) @ normalize(self.xpc).T # d=8048
-        pred[tagged_indices] += 0.2 * pref_sim.flatten()
+        sim2pref = normalize(R[:,tagged_indices] @ self.xpc) @ normalize(self.xpc).T # d=8048
+        pred[tagged_indices] += 0.2 * sim2pref.flatten()
+        pred += self.temporal_decay
         return pred
 
     def get_similar_items(self, movie, limit=20):
