@@ -100,7 +100,7 @@ class SimpleMovieCard extends BaseMovieCard {
         const card = `<div class="col-4 col-lg-3 px-0 mx-0">
             <div id="${this.cardId}" class="card h-100 mx-0 my-0 bg-dark text-light" movie-id="${movie.id}">
                 <div class="lazy-load card-header card-clickable h-100 mx-1 mx-md-2 mx-lg-3 border-dark" style="background: url(${movie.poster}); background-position: center center;
-                background-size: contain; background-repeat: no-repeat; min-height: 180px;"></div>
+                background-size: contain; background-repeat: no-repeat; min-height: 160px;"></div>
                 <div class="card-body mx-auto my-auto px-0 pt-0 pb-1 text-center" style="min-height: 60px;">
                 <p class="h6 card-title simple-title mb-0">${movie.title_kr} (${movie.release_year})</p></div>
             </div></div>`

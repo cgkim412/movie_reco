@@ -15,7 +15,7 @@
     overflow-x: hidden;
     overflow-y: hidden;
     scroll-behavior: smooth;
-    min-height: 240px;
+    min-height: 220px;
     margin-bottom: 10px;
   }
 
@@ -33,9 +33,9 @@
 <script src="{% static 'cards.js' %}"></script>
 <script src="{% static 'data-loader.js' %}"></script>
 <script>
-  const movieBaseUrl = "{% url 'movie' %}"
-  const recoListUrl = "{% url 'recommendation' %}"
-  console.log(recoListUrl)
+  const movieBaseUrl = "{% url 'movie' %}";
+  const recoListUrl = "{% url 'recommendation' %}";
+  console.log(recoListUrl);
 
   $(document).ready(() => {
     const sticky = `<div class="alert alert-success alert-dismissible fade show text-center" role="alert">
@@ -43,25 +43,25 @@
         <button type="button" class="close" data-dismiss="alert" aria-label="Close" data-toggle="tooltip" data-placement="top" title="닫기">
           <span aria-hidden="true">&times;</span>
         </button>
-      </div>`
-    $('#stickies').append(sticky)
+      </div>`;
+    $("#stickies").append(sticky);
 
-    eventManager.activateAll()
+    eventManager.activateAll();
 
     $.ajax({
-      dataType: 'json',
-      url: recoListUrl + '100/',
-      success: function (response) {
+      dataType: "json",
+      url: recoListUrl + "100/",
+      success: function(response) {
         const contLoader = new CardContainerLoader(
-          '#container-main',
+          "#container-main",
           3,
           1,
           ArrowedCardContainer
-        )
-        contLoader.initialize(JSON.parse(response))
+        );
+        contLoader.initialize(JSON.parse(response));
       }
-    })
-  })
+    });
+  });
 </script>
 {% endblock %} {% block content %}
 
