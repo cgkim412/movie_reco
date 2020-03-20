@@ -42,7 +42,7 @@ class RecoInterface:
 
     def _predict_ratings(self, R):
         tagged_indices = self.tagged_item_ids - 1
-        pred = self.mf.predict_new(R, alpha=0.05, lmbda=0.001, n_iter=20, solve=False) # d=9526
+        pred = self.mf.predict_new(R, alpha=0.05, lmbda=0.005, n_iter=30, solve=False) # d=9526
         sim2pref = normalize(R[:,tagged_indices] @ self.xpc) @ normalize(self.xpc).T # d=8048
         pred[tagged_indices] += 0.2 * sim2pref.flatten()
         pred += self.temporal_decay
@@ -130,7 +130,7 @@ class RecoInterface:
                     break
 
         # perform clustering and put labels
-        clustered_list = self._cluster_and_label(reco_list, linkage='complete', threshold=0.6)
+        clustered_list = self._cluster_and_label(reco_list, linkage='average', threshold=0.4)
 
         # partially re-cluster with relaxed constraints if too many items are labels as "기타"
         if len(clustered_list[('기타',)]) > 20:
