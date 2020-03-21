@@ -40,6 +40,15 @@ class RecoInterface:
             X[0, movie_id - 1] = score
         return X.tocsr()
 
+    def _count_occurrences(self, array):
+        count = {}
+        for val in array:
+            count[val] = count.get(val, 0) + 1
+        return count
+
+    def get_similar_items(self, movie, limit=20):
+        return movie.similar_items.all()[:limit].values_list('other_movie__id', flat=True)
+
     def _predict_ratings(self, R):
         tagged_indices = self.tagged_item_ids - 1
         pred = self.mf.predict_new(R, alpha=0.05, lmbda=0.005, n_iter=30, solve=False) # d=9526
@@ -47,9 +56,6 @@ class RecoInterface:
         pred[tagged_indices] += 0.2 * sim2pref.flatten()
         pred += self.temporal_decay
         return pred
-
-    def get_similar_items(self, movie, limit=20):
-        return movie.similar_items.all()[:limit].values_list('other_movie__id', flat=True)
 
     def _cluster_and_label(self, movie_ids, linkage='complete', threshold=0.5):
         applicable_ids = sorted(list(set(self.tagged_item_ids).intersection(set(movie_ids))))
@@ -79,7 +85,7 @@ class RecoInterface:
                     labeled_reco_list[repr_genres] = member_ids
             clustered_items += member_ids
 
-        labeled_reco_list[("기타",)] = list(set(movie_ids) - set(clustered_items))
+        labeled_reco_list[("미분류",)] = list(set(movie_ids) - set(clustered_items))
         return labeled_reco_list
 
     def _get_representative_genres(self, movie_ids):
@@ -96,12 +102,6 @@ class RecoInterface:
                 break
         return repr_genres
 
-    def _count_occurrences(self, array):
-        count = {}
-        for val in array:
-            count[val] = count.get(val, 0) + 1
-        return count
-
     def get_recommendation(self, user, limit=100):
         ratings = user.ratings.all() # by default ratings are sorted by score in descending order
         R = self._encode_ratings(ratings.values_list("movie__id", "score"))
@@ -112,7 +112,7 @@ class RecoInterface:
         user_favorites = ratings.filter(score__gte=4.0)[:15]
         for fav in user_favorites:
             similar_items = np.random.choice(self.get_similar_items(fav.movie, 20),
-                                             size=50//len(user_favorites),
+                                             size=30//len(user_favorites),
                                              replace=False)
             reco_list += similar_items.tolist()
 
@@ -130,11 +130,11 @@ class RecoInterface:
                     break
 
         # perform clustering and put labels
-        clustered_list = self._cluster_and_label(reco_list, linkage='average', threshold=0.4)
+        clustered_list = self._cluster_and_label(reco_list, linkage='complete', threshold=0.5)
 
-        # partially re-cluster with relaxed constraints if too many items are labels as "기타"
-        if len(clustered_list[('기타',)]) > 20:
-            clustered_list = self._partial_reclustering(clustered_list, ('기타',), linkage='average', threshold=0.5)
+        # partially re-cluster with relaxed constraints if too many items are labels as "미분류"
+        if len(clustered_list[('미분류',)]) > 20:
+            clustered_list = self._partial_reclustering(clustered_list, ('미분류',), linkage='average', threshold=0.5)
 
         return clustered_list
 
