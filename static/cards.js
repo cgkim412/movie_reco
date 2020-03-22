@@ -234,7 +234,8 @@ class DetailedMovieCard extends BaseMovieCard {
                             simContainerSelector,
                             12,
                             0,
-                            MoviePosterCard
+                            MoviePosterCard,
+                            null
                         )
                         loader.initialize(this._similarItems)
                     } else {

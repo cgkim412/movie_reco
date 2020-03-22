@@ -54,18 +54,20 @@ class MovieCardLoaderV extends BaseDataLoader {
         cardContainerSelector,
         initBatchSize = 10,
         batchSize = 5,
-        cardClass
+        cardClass,
+        scrollObject = window
     ) {
         super(cardContainerSelector, initBatchSize, batchSize);
         this._cardClass = cardClass;
         this._scrollOffset = 400;
+        this.scrollObject = scrollObject;
     }
 
     _setEventListener() {
-        $(window).scroll(() => {
+        $(this.scrollObject).scroll(() => {
             if (
                 $(document).height() <=
-                $(window).scrollTop() + $(window).height() + this._scrollOffset
+                $(this.scrollObject).scrollTop() + $(this.scrollObject).height() + this._scrollOffset
             ) {
                 this._eventHandler();
             }
@@ -73,7 +75,7 @@ class MovieCardLoaderV extends BaseDataLoader {
     }
 
     _unbindEventListener() {
-        $(window).off("scroll");
+        $(this.scrollObject).off("scroll");
     }
 
     _deploySingleBatch(size = this.batchSize) {
