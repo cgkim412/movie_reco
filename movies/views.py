@@ -65,5 +65,8 @@ class SimpleMovieAPI(APIView):
         else:
             response_data['poster'] = poster_url(movie.poster)
 
+        if not movie.overview_kr:
+            response_data['title_kr'], response_data['title'] = response_data['title'], response_data['title_kr']
+
         json = JSONRenderer().render(response_data)
         return Response(json)
