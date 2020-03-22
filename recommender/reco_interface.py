@@ -137,15 +137,23 @@ class RecoInterface:
             clustered_list = self._partial_reclustering(clustered_list, ('미분류',), linkage='average', threshold=0.5)
 
         # reorder dictionary
-        clustered_list = self._sort_dict_by_len(clustered_list, reverse=True)
+        clustered_list = self._sort_dict_by_len(clustered_list, reverse=True, shuffle=True)
         etc = clustered_list[('미분류',)]
         del clustered_list[('미분류',)]
         clustered_list[('미분류',)] = etc
 
         return clustered_list
 
-    def _sort_dict_by_len(self, dic, reverse=True):
-        return {k: dic[k] for k in sorted(dic.keys(), key=lambda x: len(dic.get(x)), reverse=reverse)}
+    def _sort_dict_by_len(self, dic, reverse=True, shuffle=False):
+        new_dict = {}
+        for key in sorted(dic.keys(), key=lambda x: len(dic.get(x)), reverse=reverse):
+            if shuffle:
+                new_dict[key] = np.random.permutation(dic[key])
+            else:
+                new_dict[key] = dic[key]
+        return new_dict
+
+        # return {k: dic[k] for k in sorted(dic.keys(), key=lambda x: len(dic.get(x)), reverse=reverse)}
 
     def _partial_reclustering(self, labeled_items, key, linkage, threshold):
         etcetera = labeled_items[key]
