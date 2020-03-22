@@ -122,7 +122,7 @@ class RecoInterface:
         user_favorites = ratings.filter(score__gte=4.0)[:15]
         for fav in user_favorites:
             similar_items = np.random.choice(self.get_similar_items(fav.movie, 20),
-                                             size=30//len(user_favorites),
+                                             size=min(30//len(user_favorites), 10),
                                              replace=False)
             reco_list += similar_items.tolist()
 
@@ -167,8 +167,6 @@ class RecoInterface:
             else:
                 new_dict[key] = dic[key]
         return new_dict
-
-        # return {k: dic[k] for k in sorted(dic.keys(), key=lambda x: len(dic.get(x)), reverse=reverse)}
 
     def _partial_reclustering(self, labeled_items, key, linkage, threshold):
         etcetera = labeled_items[key]
