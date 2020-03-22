@@ -53,7 +53,7 @@ class RecoInterface:
         tagged_indices = self.tagged_item_ids - 1
         pred = self.mf.predict_new(R, alpha=0.05, lmbda=0.005, n_iter=30, solve=False) # d=9526
         sim2pref = normalize(R[:,tagged_indices] @ self.xpc) @ normalize(self.xpc).T # d=8048
-        pred[tagged_indices] += 0.2 * sim2pref.flatten()
+        pred[tagged_indices] += 0.25 * sim2pref.flatten()
         pred += self.temporal_decay
         return pred
 
@@ -112,7 +112,7 @@ class RecoInterface:
         user_favorites = ratings.filter(score__gte=4.0)[:15]
         for fav in user_favorites:
             similar_items = np.random.choice(self.get_similar_items(fav.movie, 20),
-                                             size=30//len(user_favorites),
+                                             size=40//len(user_favorites),
                                              replace=False)
             reco_list += similar_items.tolist()
 
@@ -130,13 +130,22 @@ class RecoInterface:
                     break
 
         # perform clustering and put labels
-        clustered_list = self._cluster_and_label(reco_list, linkage='complete', threshold=0.5)
+        clustered_list = self._cluster_and_label(reco_list, linkage='complete', threshold=0.6)
 
         # partially re-cluster with relaxed constraints if too many items are labels as "미분류"
         if len(clustered_list[('미분류',)]) > 20:
             clustered_list = self._partial_reclustering(clustered_list, ('미분류',), linkage='average', threshold=0.5)
 
+        # reorder dictionary
+        clustered_list = self._sort_dict_by_len(clustered_list, reverse=True)
+        etc = clustered_list[('미분류',)]
+        del clustered_list[('미분류',)]
+        clustered_list[('미분류',)] = etc
+
         return clustered_list
+
+    def _sort_dict_by_len(self, dic, reverse=True):
+        return {k: dic[k] for k in sorted(dic.keys(), key=lambda x: len(dic.get(x)), reverse=reverse)}
 
     def _partial_reclustering(self, labeled_items, key, linkage, threshold):
         etcetera = labeled_items[key]
@@ -161,9 +170,7 @@ class RecoInterface:
             else:
                 # print(f'{label} 카테고리로 아이템 {len(items)}개 이동')
                 moved_items += items
-        new_etc = list(set(etcetera) - set(moved_items))
-        del clustered_items[key]
-        clustered_items[key] = new_etc
+        clustered_items[key] = list(set(etcetera) - set(moved_items))
         return clustered_items
 
     def get_eval_list(self, user, limit=100):
