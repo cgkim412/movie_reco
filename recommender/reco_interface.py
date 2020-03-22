@@ -24,13 +24,13 @@ class RecoInterface:
                                         order_by('movie_id').values_list('movie_id', flat=True))
         self.all_item_ids = np.arange(1, 9527)
         self.xpc = self._load_xpc(25)
-        self.temporal_decay = self._compute_temporal_decay(2010, 0.01)
+        self.temporal_discount = self._compute_temporal_discount(2010, 0.015)
 
     def _load_xpc(self, n_components):
         data = np.load(os.path.join(PARAMS_PATH, "movie_features_pc50.npy"))
         return pd.DataFrame(data, index=self.tagged_item_ids)[np.arange(n_components)]
 
-    def _compute_temporal_decay(self, threshold, decay_rate):
+    def _compute_temporal_discount(self, threshold, decay_rate):
         years = np.array(Movie.objects.order_by('id').values_list('release_year', flat=True))
         return np.clip(years - threshold, None, 0) * decay_rate
 
@@ -54,7 +54,7 @@ class RecoInterface:
         pred = self.mf.predict_new(R, alpha=0.05, lmbda=0.005, n_iter=30, solve=False) # d=9526
         sim2pref = normalize(R[:,tagged_indices] @ self.xpc) @ normalize(self.xpc).T # d=8048
         pred[tagged_indices] += 0.25 * sim2pref.flatten()
-        pred += self.temporal_decay
+        pred += self.temporal_discount
         return pred
 
     def _cluster_and_label(self, movie_ids, linkage='complete', threshold=0.5):
@@ -112,7 +112,7 @@ class RecoInterface:
         user_favorites = ratings.filter(score__gte=4.0)[:15]
         for fav in user_favorites:
             similar_items = np.random.choice(self.get_similar_items(fav.movie, 20),
-                                             size=40//len(user_favorites),
+                                             size=30//len(user_favorites),
                                              replace=False)
             reco_list += similar_items.tolist()
 
@@ -130,7 +130,7 @@ class RecoInterface:
                     break
 
         # perform clustering and put labels
-        clustered_list = self._cluster_and_label(reco_list, linkage='complete', threshold=0.6)
+        clustered_list = self._cluster_and_label(reco_list, linkage='complete', threshold=0.5)
 
         # partially re-cluster with relaxed constraints if too many items are labels as "미분류"
         if len(clustered_list[('미분류',)]) > 20:
