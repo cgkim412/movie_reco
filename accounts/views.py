@@ -54,7 +54,7 @@ def guest_login(request):
 
     random_email = generate_random_email(16)
     try:
-        old_user = User.objects.get(email=random_email)
+        User.objects.get(email=random_email)
     except User.DoesNotExist:
         pass
     else:
