@@ -52,13 +52,11 @@ def guest_login(request):
     if 'user' in request.session:
         del request.session['user']
 
-    is_unique = False
-    while not is_unique:
+    while True:
         random_email = generate_random_email(32)
         try:
             User.objects.get(email=random_email)
         except User.DoesNotExist:
-            is_unique = True
             break
         else:
             continue
