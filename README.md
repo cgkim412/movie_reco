@@ -4,7 +4,7 @@ This is my first web development project which is based on Django. You're welcom
 
 What it does is straight and simple: You rate 10 movies on a 5-stars scale, then it recommends you a bunch of movies that'll (hopefully) suit your taste.
 
-You can browse the site by either signing up, or using a guest account. Use the latter option if you are worried about any security/privacy issues.
+You can browse the site either by signing up, or by using a guest account. Use the latter option if you are worried about any security/privacy issues.
 
 ---
 
