@@ -52,14 +52,13 @@ def guest_login(request):
     if 'user' in request.session:
         del(request.session['user'])
 
-    random_email = generate_random_email(16)
+    random_email = generate_random_email(32)
     try:
-        User.objects.get(email=random_email)
+        old_user = User.objects.get(email=random_email)
     except User.DoesNotExist:
         pass
     else:
-        random_email = generate_random_email(20)
-
+        old_user.delete()
     new_user = User(email=random_email,
                     password=generate_random_password(16),
                     type=User.USER
