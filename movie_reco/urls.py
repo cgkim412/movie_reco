@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from core.views import index, about, home
-from accounts.views import LoginView, RegisterView, logout
+from accounts.views import LoginView, RegisterView, logout, guest_login
 from ratings.views import evaluate, my_ratings, RatingAPI
 from movies.views import MovieAPI, SimpleMovieAPI
 from recommender.views import RecoListAPI
@@ -40,6 +40,7 @@ urlpatterns = [
     path('home/', home, name='home'),
     path('about/', about, name='about'),
     path('login/', LoginView.as_view(), name='login'),
+    path('guest/', guest_login, name='guest'),
     path('logout/', logout, name='logout'),
     path('register/', RegisterView.as_view(), name='register'),
     path('evaluate/record/', my_ratings, name='eval_record'),

@@ -15,7 +15,7 @@ def home(request):
     user = get_user_obj(request)
     if user.ratings.all().count() < 10:
         return redirect('evaluate')
-    return render(request, 'home.html')
+    return render(request, 'home.html', {'user': user.email})
 
 @login_required
 def about(request):
