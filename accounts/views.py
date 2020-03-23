@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import FormView
 from .forms import RegisterForm, LoginForm
 from .models import User
-from .random_accounts import generate_random_email, generate_random_password
+from .utils import generate_random_email, generate_random_password
 
 
 class RegisterView(FormView):

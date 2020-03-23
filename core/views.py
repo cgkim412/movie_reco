@@ -10,6 +10,7 @@ def index(request):
     else:
         return redirect('home')
 
+
 @login_required
 def home(request):
     user = get_user_obj(request)
@@ -17,9 +18,11 @@ def home(request):
         return redirect('evaluate')
     return render(request, 'home.html', {'user': user.email})
 
+
 @login_required
 def about(request):
     return render(request, 'about.html')
+
 
 @login_required
 def author(request):

@@ -1,4 +1,5 @@
 from accounts.models import User
+from django.utils.crypto import get_random_string
 
 
 def get_user_obj(request):
@@ -12,3 +13,10 @@ def get_user_obj(request):
     else:
         return user
 
+
+def generate_random_email(length):
+    return get_random_string(length) + "@random.user"
+
+
+def generate_random_password(length):
+    return get_random_string(length)
