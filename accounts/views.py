@@ -44,21 +44,24 @@ class LoginView(FormView):
 
 def logout(request):
     if 'user' in request.session:
-        del(request.session['user'])
+        del request.session['user']
     return redirect('index')
 
 
 def guest_login(request):
     if 'user' in request.session:
-        del(request.session['user'])
+        del request.session['user']
 
-    random_email = generate_random_email(32)
-    try:
-        old_user = User.objects.get(email=random_email)
-    except User.DoesNotExist:
-        pass
-    else:
-        old_user.delete()
+    is_unique = False
+    while not is_unique:
+        random_email = generate_random_email(32)
+        try:
+            User.objects.get(email=random_email)
+        except User.DoesNotExist:
+            is_unique = True
+            break
+        else:
+            continue
     new_user = User(email=random_email,
                     password=generate_random_password(16),
                     type=User.USER
