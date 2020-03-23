@@ -22,11 +22,6 @@ class RegisterView(FormView):
         self.request.session['user'] = user.id
         return super().form_valid(form)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['random_email'] = generate_random_email(16)
-        return context
-
 
 class LoginView(FormView):
     template_name = 'login.html'
@@ -56,7 +51,16 @@ def logout(request):
 def guest_login(request):
     if 'user' in request.session:
         del(request.session['user'])
-    new_user = User(email=generate_random_email(16),
+
+    random_email = generate_random_email(16)
+    try:
+        old_user = User.objects.get(email=random_email)
+    except User.DoesNotExist:
+        pass
+    else:
+        random_email = generate_random_email(20)
+
+    new_user = User(email=random_email,
                     password=generate_random_password(16),
                     type=User.USER
     )
