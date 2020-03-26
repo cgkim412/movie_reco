@@ -63,10 +63,6 @@ class MovieCountrySerializer(ModelSerializer):
 
 
 class MovieSerializer(ModelSerializer):
-    '''
-    Development mode implementation:
-        - Doesn't include some TMDB data yet
-    '''
     genres = MovieGenreSerializer(many=True, read_only=True)
     directors = MovieDirectorSerializer(many=True, read_only=True)
     actors = MovieActorSerializer(many=True, read_only=True)
