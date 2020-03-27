@@ -1,3 +1,9 @@
+/*
+ *  Written by Changgyu Kim
+ *  aneewe@gmail.com
+ */
+
+
 class BaseDataLoader {
     constructor(cardContainerSelector, initBatchSize, batchSize) {
         this.cardContainerSelector = cardContainerSelector;

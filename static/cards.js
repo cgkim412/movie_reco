@@ -1,3 +1,8 @@
+/*
+ *  Written by Changgyu Kim
+ *  aneewe@gmail.com
+ */
+
 // assumes following variables are defined in the global scope
 // movieBaseUrl, evalBaseUrl, csrftoken, eventManager
 
