@@ -57,7 +57,7 @@ class RatingAPI(APIView):
         except KeyError:
             return Response(status=400)
         else:
-            if score not in (0.5 * i for i in range(1, 11)):
+            if score not in Rating.VALID_SCORES:
                 return Response(status=400)
 
         try:
