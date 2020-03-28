@@ -2,7 +2,7 @@ https://hermercur.pythonanywhere.com/
 
 This is my first web development project which is based on Django. You're welcome to take a look at the code.
 
-What it does is straight and simple: You rate 10 movies on a 5-stars scale, then it recommends you a bunch of movies that'll (hopefully) suit your taste.
+What it does is very straightforward: You rate 10 movies on a 5-stars scale, then it recommends you a bunch of movies that'll (hopefully) suit your taste.
 
 You can browse the site either by signing up, or by using a guest account. Use the latter option if you are worried about any security/privacy issues.
 
@@ -10,41 +10,45 @@ You can browse the site either by signing up, or by using a guest account. Use t
 
 https://hermercur.pythonanywhere.com/
 
-간단한 영화 추천 사이트입니다.
+머신러닝과 TMDb API를 활용한 영화 추천 사이트입니다.
 
 유저가 처음 로그인하면 먼저 영화를 10개 평가해 달라고 안내해 줍니다. 10개를 다 채운 후 "홈"으로 가면 추천 영화 목록이 계산되어서 나옵니다.
 
-계정을 직접 생성하시거나, 혹은 자동생성되는 게스트 계정으로 로그인하셔서 사이트를 둘러보실 수 있습니다.
+계정을 직접 생성하시거나, 혹은 편리하게 게스트 계정으로 로그인하셔서 사이트를 둘러보실 수 있습니다.
 
 ---
 
-##### _아래 내용은 실제 사이트 접속 후 '소개' 페이지로 가면 더 자세히 나와 있습니다._
-
 #### CREDITS
 
-본 사이트는 TMDb API를 사용합니다. 단, TMDb가 어떠한 보증 혹은 인증을 하지는 않습니다. ("This product uses the TMDb API but is not endorsed or certified by TMDb.")
+- 본 사이트는 TMDb API를 사용합니다. 단, TMDb가 어떠한 보증 혹은 인증을 하지는 않습니다. ("This product uses the TMDb API but is not endorsed or certified by TMDb.")
 
-머신 러닝에 사용된 영화 평점 및 태그 데이터는 The MovieLens Datasets에서 추출하였습니다.
+- 머신 러닝에 사용된 영화 평점 및 태그 데이터는 The MovieLens Datasets에서 추출하였습니다.
 
-영화 데이터의 일부(감독, 배우, 영문제목 등)는 IMDb Datasets에서 가져왔습니다.
+- 영화 데이터의 일부(감독, 배우, 영문제목 등)는 IMDb Datasets에서 가져왔습니다.
 
-'별점 주기' 스크립트는 star-rating-svg를 개조하여 사용하였습니다. (https://github.com/nashio/star-rating-svg)
+- '별점 주기' 스크립트는 star-rating-svg를 개조하여 사용하였습니다. (https://github.com/nashio/star-rating-svg)
+
+---
 
 #### 웹 개발 도구
 
-백엔드: Django, Django REST framework, SQLite, etc
+- 백엔드: Django, Django REST framework, SQLite, etc
 
-프론트엔드: jQuery, Bootstrap
+- 프론트엔드: jQuery, Bootstrap
+
+---
 
 #### ML 알고리즘
 
-추천 시스템은 MovieLens의 평점 및 태그 데이터를 기반으로 작동하며, 복수의 알고리즘이 함께 활용됩니다.
+- 추천 시스템은 MovieLens의 평점 및 태그 데이터를 기반으로 작동하며, 복수의 알고리즘이 함께 활용됩니다.
 
-평점 예측: matrix factorization 기반의 협업 필터링 시스템을 NumPy로 구현하여 사용합니다. 유저 평점 데이터를 바탕으로 전체 영화에 대한 예상 점수를 계산합니다.
+  - 평점 예측: matrix factorization 기반의 협업 필터링 시스템을 NumPy로 구현하여 사용합니다. 유저 평점 데이터를 바탕으로 전체 영화에 대한 예상 점수를 계산합니다.
 
-비슷한 영화 찾기: 영화 태그 데이터를 feature로 활용하여 영화 간 cosine similarity를 계산합니다. 유저가 직접 '비슷한 영화 보기' 버튼을 눌렀을 때뿐만 아니라 영화 추천에도 활용됩니다.
+  - 비슷한 영화 찾기: 영화 태그 데이터를 feature로 활용하여 영화 간 cosine similarity를 계산합니다. 유저가 직접 '비슷한 영화 보기' 버튼을 눌렀을 때뿐만 아니라 영화 추천에도 활용됩니다.
 
-영화 자동 분류: 추천 영화 목록은 hierarchical clustering을 통해 자동으로 분류됩니다. 먼저 비슷한 영화끼리 같은 그룹으로 묶은 뒤, 각 그룹을 대표하는 장르를 추출하여 유저에게 표시해 줍니다.
+  - 영화 자동 분류: 추천 영화 목록은 hierarchical clustering을 통해 자동으로 분류됩니다. 먼저 비슷한 영화끼리 같은 그룹으로 묶은 뒤, 각 그룹을 대표하는 장르를 추출하여 유저에게 표시해 줍니다.
+
+---
 
 #### 설계
 
