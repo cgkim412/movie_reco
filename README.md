@@ -40,13 +40,13 @@ https://hermercur.pythonanywhere.com/
 
 ### ML 알고리즘
 
-- 추천 시스템은 MovieLens의 평점 및 태그 데이터를 기반으로 작동하며, 복수의 알고리즘이 함께 활용됩니다. [더 자세한 내용은 블로그에...](https://blog.naver.com/hermercur/221836101047)
+추천 시스템은 MovieLens의 평점 및 태그 데이터를 기반으로 작동하며, 복수의 알고리즘이 함께 활용됩니다. [더 자세한 내용은 블로그에...](https://blog.naver.com/hermercur/221836101047)
 
-  - 평점 예측: matrix factorization 기반의 협업 필터링 시스템을 NumPy로 구현하여 사용합니다. 유저 평점 데이터를 바탕으로 전체 영화에 대한 예상 점수를 계산합니다. [더 자세한 내용은 블로그에...](https://blog.naver.com/hermercur/221803243551)
+- 평점 예측: matrix factorization 기반의 협업 필터링 시스템을 NumPy로 구현하여 사용합니다. 유저 평점 데이터를 바탕으로 전체 영화에 대한 예상 점수를 계산합니다. [더 자세한 내용은 블로그에...](https://blog.naver.com/hermercur/221803243551)
 
-  - 비슷한 영화 찾기: 영화 태그 데이터를 feature로 활용하여 영화 간 cosine similarity를 계산합니다. 유저가 직접 '비슷한 영화 보기' 버튼을 눌렀을 때뿐만 아니라 영화 추천에도 활용됩니다. [더 자세한 내용은 블로그에...](https://blog.naver.com/hermercur/221801410506)
+- 비슷한 영화 찾기: 영화 태그 데이터를 feature로 활용하여 영화 간 cosine similarity를 계산합니다. 유저가 직접 '비슷한 영화 보기' 버튼을 눌렀을 때뿐만 아니라 영화 추천에도 활용됩니다. [더 자세한 내용은 블로그에...](https://blog.naver.com/hermercur/221801410506)
 
-  - 영화 자동 분류: 추천 영화 목록은 hierarchical clustering을 통해 자동으로 분류됩니다. 먼저 비슷한 영화끼리 같은 그룹으로 묶은 뒤, 각 그룹을 대표하는 장르를 추출하여 유저에게 표시해 줍니다.
+- 영화 자동 분류: 추천 영화 목록은 hierarchical clustering을 통해 자동으로 분류됩니다. 먼저 비슷한 영화끼리 같은 그룹으로 묶은 뒤, 각 그룹을 대표하는 장르를 추출하여 유저에게 표시해 줍니다.
 
 ---
 
