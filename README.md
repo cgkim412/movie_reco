@@ -18,7 +18,7 @@ https://hermercur.pythonanywhere.com/
 
 ---
 
-#### CREDITS
+### CREDITS
 
 - 본 사이트는 TMDb API를 사용합니다. 단, TMDb가 어떠한 보증 혹은 인증을 하지는 않습니다. ("This product uses the TMDb API but is not endorsed or certified by TMDb.")
 
@@ -30,7 +30,7 @@ https://hermercur.pythonanywhere.com/
 
 ---
 
-#### 웹 개발 도구
+### 웹 개발 도구
 
 - 백엔드: Django, Django REST framework, SQLite, etc
 
@@ -38,7 +38,7 @@ https://hermercur.pythonanywhere.com/
 
 ---
 
-#### ML 알고리즘
+### ML 알고리즘
 
 - 추천 시스템은 MovieLens의 평점 및 태그 데이터를 기반으로 작동하며, 복수의 알고리즘이 함께 활용됩니다. [더 자세한 내용은 블로그에...](https://blog.naver.com/hermercur/221836101047)
 
@@ -50,7 +50,7 @@ https://hermercur.pythonanywhere.com/
 
 ---
 
-#### 설계
+### 설계
 
 이 프로젝트의 핵심이 되는 MovieLens 데이터에는 62,000개 영화에 대한 162,000명 유저들의 평점 및 태그 데이터가 들어 있습니다. 머신러닝 모델의 학습에 활용할 수 있는 데이터입니다. 이 중에서 실제 어플리케이션에 사용하기 적합한 9,500개 영화만 골라냅니다.
 
