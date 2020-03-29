@@ -51,6 +51,7 @@ class RatingAPI(APIView):
             return Response(json)
 
     def post(self, request, movie_id):
+
         # validate the data
         try:
             score = request.data['score']
