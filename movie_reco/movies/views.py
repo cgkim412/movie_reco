@@ -13,23 +13,26 @@ from .exceptions import UpdateFailed
 from .models import Movie
 from .serializers import SimpleMovieSerializer, MovieSerializer
 
+
 logger = logging.getLogger('movie_api')
 
 
 def run_update(movie):
-        try:
-            movie.update_from_tmdb()
-        except UpdateFailed:
-            logger.error(f"Couldn't get movie data from TMDB API: {movie.title} ({movie.release_year})")
-        else:
-            pass
+    try:
+        movie.update_from_tmdb()
+    except UpdateFailed:
+        logger.error(f"Couldn't get movie data from TMDB API: {movie.title} ({movie.release_year})")
+    else:
+        pass
+
 
 @method_decorator(login_required, name='dispatch')
 class MovieAPI(APIView):
+
     def get(self, request, movie_id):
         movie = get_object_or_404(Movie, id=movie_id)
 
-        if movie.is_init_state:
+        if movie.is_init_state or movie.is_older_than(1):
             run_update(movie)
 
         response_data = MovieSerializer(movie).data
@@ -55,7 +58,7 @@ class SimpleMovieAPI(APIView):
     def get(self, request, movie_id):
         movie = get_object_or_404(Movie, id=movie_id)
 
-        if movie.is_init_state:
+        if movie.is_init_state or movie.is_older_than(1):
             run_update(movie)
 
         response_data = SimpleMovieSerializer(movie).data

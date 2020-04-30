@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 import requests
 from django.db import models
 
@@ -38,6 +40,9 @@ class Movie(models.Model):
     def __str__(self):
         return self.title
 
+    def is_older_than(self, days: int):
+        return (datetime.now(timezone.utc) - self.last_update).days >= days
+
     def update_from_tmdb(self, force_update=False):
         response = requests.get(api_url(self.tmdb_id))
 
@@ -49,7 +54,7 @@ class Movie(models.Model):
         if self.is_init_state or force_update:
             self.title_kr = data['title']
             self.release_date = data['release_date']
-            self.poster = data['poster_path']
+
             self.tagline = data['tagline']
             self.overview_kr = data['overview']
 
@@ -86,6 +91,7 @@ class Movie(models.Model):
 
             self.is_init_state = False
 
+        self.poster = data['poster_path']
         self.tmdb_score = data['vote_average']
         self.tmdb_votes = data['vote_count']
         self.tmdb_popularity = data['popularity']
